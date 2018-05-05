@@ -63,6 +63,7 @@ contract Will is Ownable {
     public onlyOwner
   {
     require(_beneficiary != 0x0);
+    require(_beneficiary != beneficiaries[0]);//Ensure  first beneficiary can never be removed
     uint256 idx = getBeneficiaryIndex(_beneficiary);
 
     assert(beneficiaries[idx] == _beneficiary);
