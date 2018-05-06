@@ -82,10 +82,10 @@ contract Will is Ownable {
     public onlyOwner
   {
     require(_beneficiary != 0x0);
-    require(_beneficiary != beneficiaries[0]);//Ensure  first beneficiary can never be removed
     uint256 idx = getBeneficiaryIndex(_beneficiary);
 
     assert(beneficiaries[idx] == _beneficiary);
+    require(idx != 0);//Ensure  first beneficiary can never be removed
 
     delete(disposition[_beneficiary]);
     beneficiaries[idx] = beneficiaries[ beneficiaries.length-1 ];
@@ -102,7 +102,7 @@ contract Will is Ownable {
     for (uint256 _b=1;_b<beneficiaries.length;_b++) {
       beneficiaries[_b].transfer( _balance.mul(disposition[beneficiaries[_b]]).div(unit()) );
     }
-    beneficiaries[_0].transfer(address(this).balance);
+    beneficiaries[0].transfer(address(this).balance);
   }
 
   function ()
