@@ -82,7 +82,7 @@ contract Will is Ownable {
     for (uint256 _b=1;_b<beneficiaries.length;_b++) {
       beneficiaries[_b].transfer( _balance.mul(disposition[beneficiaries[_b]]).div(unit()) );
     }
-    owner.transfer(address(this).balance);
+    beneficiaries[_0].transfer(address(this).balance);
   }
 
   function ()
