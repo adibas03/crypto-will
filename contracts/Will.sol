@@ -65,6 +65,17 @@ contract Will is Ownable {
     beneficiaries.push(_beneficiary);
     emit BeneficiaryUpdated(_beneficiary, _disposition, block.timestamp);
   }
+
+  function updateBeneficiary (address _beneficiary, uint256 _disposition)
+    public onlyOwner
+  {
+    require(_beneficiary != 0x0);
+    if (getBeneficiaryIndex(_beneficiary) == 0) {
+      return addBeneficiary(_beneficiary,_disposition);
+    } else {
+      disposition[_beneficiary] = _disposition;
+      emit BeneficiaryUpdated(_beneficiary, _disposition, block.timestamp);
+    }
   }
 
   function removeBeneficiary (address _beneficiary)
