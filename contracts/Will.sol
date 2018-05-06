@@ -3,6 +3,9 @@ pragma solidity ^0.4.23;
 import './libraries/SafeMath.sol';
 import './Ownable.sol';
 
+/**
+* Vault only instantiation, only focuses on eth value
+*/
 contract Will is Ownable {
   using SafeMath for uint;
 
@@ -11,6 +14,8 @@ contract Will is Ownable {
   uint256 lastInteraction; //Last time contract was interacted with
   address[] beneficiaries; //Address for each beneficiary
   mapping( address => uint256) disposition; //Percentage of total balacne to be sent to each beneficiary
+
+  event BeneficiaryUpdated( address _beneficiary, uint256 _disposition, uint256 _timestamp); //Notify of update to beneficiaries / disposition
 
   constructor (uint256 _waitTime )
     public
@@ -55,8 +60,11 @@ contract Will is Ownable {
     public onlyOwner
   {
     require(_beneficiary != 0x0);
+    require(getBeneficiaryIndex(_beneficiary) == 0);
     disposition[_beneficiary] = _disposition;
     beneficiaries.push(_beneficiary);
+    emit BeneficiaryUpdated(_beneficiary, _disposition, block.timestamp);
+  }
   }
 
   function removeBeneficiary (address _beneficiary)
@@ -72,9 +80,10 @@ contract Will is Ownable {
     beneficiaries[idx] = beneficiaries[ beneficiaries.length-1 ];
     delete(beneficiaries[beneficiaries.length-1]);
     beneficiaries.length--;
+    emit BeneficiaryUpdated(_beneficiary, 0, block.timestamp);
   }
 
-  function triggerDisposition () //Send balances to beneficiaries and send remainder to owner
+  function triggerDisposition () //Send balances to beneficiaries and send remainder to contract creator
     public
   {
     require(isDispositionDue());
