@@ -9,7 +9,7 @@ import './Ownable.sol';
 contract Will is Ownable {
   using SafeMath for uint;
 
-  uint256 decimals = 8; //Allow fractions for disposition
+  uint256 constant decimals = 8; //Allow fractions for disposition
   uint256 waitingTime; //How long to wait before initiating distribution
   uint256 lastInteraction; //Last time contract was interacted with
   address[] beneficiaries; //Address for each beneficiary
@@ -25,7 +25,7 @@ contract Will is Ownable {
   }
 
   function unit ()
-    public view
+    public pure
   returns (uint) {
     return 10**decimals;
   }
