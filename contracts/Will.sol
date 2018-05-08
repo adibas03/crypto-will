@@ -20,8 +20,9 @@ contract Will is Ownable {
   constructor (uint256 _waitTime )
     public
   {
-    beneficiaries[0] = msg.sender;
+    beneficiaries.push(msg.sender);
     waitingTime = _waitTime;
+    lastInteraction = now;
   }
 
   function unit ()
