@@ -19,12 +19,6 @@ contract Wallet is Ownable {
     return true;
   }
 
-  function transfer ()
-    public payable
-  returns (bool) {
-    return true;
-  }
-
   function callFunction (address _address, uint256 _value, bytes32 _callData) //Can be used to make wallet type calls, to interact with smart contracts
     public payable onlyOwner
   returns (bool) {
