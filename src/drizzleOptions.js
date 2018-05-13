@@ -1,6 +1,6 @@
-import ComplexStorage from './../build/contracts/ComplexStorage.json'
-import SimpleStorage from './../build/contracts/SimpleStorage.json'
-import TutorialToken from './../build/contracts/TutorialToken.json'
+import Will from './../build/contracts/Will.json'
+import Wallet from './../build/contracts/Wallet.json'
+import WillWallet from './../build/contracts/WillWallet.json'
 
 const drizzleOptions = {
   web3: {
@@ -11,12 +11,12 @@ const drizzleOptions = {
     }
   },
   contracts: [
-    ComplexStorage,
-    SimpleStorage,
-    TutorialToken
+    Will,
+    Wallet,
+    WillWallet
   ],
   events: {
-    SimpleStorage: ['StorageSet']
+    Will: ['BeneficiaryUpdated']
   },
   polls: {
     accounts: 1500
