@@ -1,13 +1,11 @@
 const path = require('path');
 
-process.env.BABEL_ENV = 'production';
+process.env.BABEL_ENV = 'development';
 
 module.exports = {
   entry: './src/index.js',
   output: {
-    filename: 'drizzle-react-components.js',
-    library: 'drizzle-react-components',
-    libraryTarget: 'umd',
+    filename: 'bundle.js',
     path: path.resolve(__dirname, 'dist')
   },
   module: {

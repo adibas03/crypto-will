@@ -1,11 +1,35 @@
-import AccountData from './AccountData.js'
-import ContractData from './ContractData.js'
-import ContractForm from './ContractForm.js'
-import LoadingContainer from './LoadingContainer.js'
+import React from "react";
+import ReactDOM from "react-dom";
+// import "./index.css";
+import App from "./App";
+// import registerServiceWorker from "./registerServiceWorker";
+import { DrizzleProvider } from "drizzle-react";
 
-export {
-  AccountData,
-  ContractData,
-  ContractForm,
-  LoadingContainer
-}
+// Import contract
+import TutorialToken from "../build/contracts/TutorialToken.json";
+
+const options = {
+  web3: {
+  //   block: false,
+    fallback: {
+      type: "ws",
+      url: "ws://127.0.0.1:8545"
+    }
+  },
+  contracts: [
+    TutorialToken
+  ],
+  // events: {}
+};
+
+const root = document.createElement("div");
+root.setAttribute('id', 'root');
+document.body.appendChild(root);
+
+ReactDOM.render(
+  <DrizzleProvider options={options}>
+    <App />
+  </DrizzleProvider>,
+  document.getElementById("root")
+);
+// registerServiceWorker();
