@@ -6,34 +6,18 @@ import { drizzleConnect } from "drizzle-react";
 import { LoadingContainer, ContractData, ContractForm } from "drizzle-react-components";
 
 class App extends Component {
-  constructor(props, context) {
-    console.log(props);
-    console.log(context)
   }
 
   render() {
     const { drizzleStatus, accounts } = this.props;
-    console.log(drizzleStatus)
-    console.log(this.props)
 
     if (drizzleStatus.initialized) {
-    console.log(drizzleStatus)
-
-    return (
-        <div className="App">
-          <header className="App-header">
-            <h1 className="App-title">Tutorial Token</h1>
-            x
-            <h3>Send Tokens</h3>
-          </header>
-          <div className="App-intro">
-            
           </div>
         </div>
       );
+    } else {
+      return (<div><LoadingContainer/></div>);
     }
-
-    return (<div><LoadingContainer/></div>);
   }
 }
 
