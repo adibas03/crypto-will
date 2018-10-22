@@ -12,27 +12,37 @@ class App extends Component {
     this.state = {
       selecedAccount: this.props.accounts[0]
     };
+
+    this.updateSelectedAccount = this.updateSelectedAccount.bind(this);
+  }
+
+  updateSelectedAccount (event) {
+    this.setState({ selecedAccount: event.key });
   }
 
   render() {
     const { drizzleStatus } = this.props;
 
-    if (drizzleStatus.initialized) {
-      return (
-          <div className="App">
-            <header className="App-header">
-              <h1 className="App-title">Crypto will</h1>
-              <Accounts {...{ accounts: this.props.accounts, selected: this.state.selecedAccount }} />
-              <h3>Send Tokens</h3>
-            </header>
-            <div className="App-intro">
+    return (
+      <Layout className="App">
+        { !drizzleStatus.initialized &&
+          <LoadingContainer>
+            <div></div>
+          </LoadingContainer>
+        }
+        { drizzleStatus.initialized &&
+          <Layout>
+            <Layout >
+                <h1 className="App-title">Crypto will</h1>
+            </Layout>
+            <Accounts {...{ accounts: this.props.accounts, selected: this.state.selecedAccount, selectAccount: this.updateSelectedAccount }} />
+            <Content className="App-intro">
               
-            </div>
-          </div>
-      );
-    } else {
-      return (<div><LoadingContainer><div></div></LoadingContainer></div>);
-    }
+            </Content>
+          </Layout>
+        }
+      </Layout>
+    );
   }
 }
 
@@ -41,6 +51,7 @@ const mapStateToProps = state => {
     accounts: state.accounts,
     accountBalances: state.accountBalances,
     drizzleStatus: state.drizzleStatus,
+    web3: state.web3,
     Deployer: state.contracts.Deployer,
     TutorialToken: state.contracts.TutorialToken,
     // WillWallet: state.contracts.WillWallet

@@ -1,6 +1,6 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
-import './Ownable.sol';
+import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
 * Wallet instantiation, is albe to run almost any Interaction: eth, toke, transactions

@@ -1,7 +1,7 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
-import './libraries/SafeMath.sol';
-import './Ownable.sol';
+import "../installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol";
+import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
 * Vault only instantiation, only focuses on eth value
