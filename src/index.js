@@ -23,7 +23,11 @@ const options = {
     TutorialToken,
     // WillWallet
   ],
-  // events: {}
+  // events: {},
+  polls: {
+    accounts: 100,
+    blocks: 10000
+  }
 };
 
 const root = document.createElement("div");
