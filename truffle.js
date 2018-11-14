@@ -11,6 +11,8 @@
  *     gasPrice: 10000000000,
  *   },
  */
+const HDWalletProvider = require('truffle-hdwallet-provider');
+const MNEMONIC = 'tragic lab sheriff bag clump cabin arena head trophy exit traffic thrive napkin hurdle green';
 
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
@@ -20,6 +22,13 @@ module.exports = {
       network_id: 1002,
       host: "127.0.0.1",
       port: 8545   // Different than the default below
+    },
+    ropsten: {
+      network_id: 3,
+      provider: function() {
+        return new HDWalletProvider(MNEMONIC, 'https://ropsten.infura.io')
+      },
+      gasPrice: 10000000000,
     }
   }
 };

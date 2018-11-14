@@ -1,33 +1,27 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import { ContractTypes, FormHelp } from '../../Config';
-
-import Dropdown from 'antd/lib/dropdown';
-import Icon from 'antd/lib/icon';
-import Menu from 'antd/lib/menu';import Col from 'antd/lib/layout';
+import { web3Scripts } from '../../Scripts';
 
 import Button from 'antd/lib/button';
-// import Col from 'antd/lib/col';
+import Col from 'antd/lib/col';
 import Form from 'antd/lib/form';
+import Icon from 'antd/lib/icon';
 import Input from 'antd/lib/input';
-import Layout from 'antd/lib/layout';
+import notification from 'antd/lib/notification';
 import Row from 'antd/lib/row';
 import Select from 'antd/lib/select';
 
 import 'antd/lib/button/style';
-// import 'antd/lib/col/style';
+import 'antd/lib/col/style';
 import 'antd/lib/form/style';
+import 'antd/lib/icon/style';
 import 'antd/lib/input/style';
-import 'antd/lib/layout/style';
+import 'antd/lib/notification/style';
 import 'antd/lib/row/style';
 import 'antd/lib/select/style';
 
-import 'antd/lib/dropdown/style';
-import 'antd/lib/icon/style';
-import 'antd/lib/menu/style';
-
-const { Header, Content, Sider } = Layout;
 const { Item } = Form;
 const { Option } = Select;
 
@@ -35,11 +29,70 @@ const { Option } = Select;
 class Deployer extends Component {
     constructor (props) {
         super(props);
-        this.state = {};
+        this.state = {
+            formValidations: {
+                contractType: false,
+                waitTime: false
+            }
+        };
+        this.deployContract = this.deployContract.bind(this);
+        this.validateField = this.validateField.bind(this);
+        this.validateForm = this.validateForm.bind(this);
+    }
+
+    async deployContract (e) {
+        e.preventDefault();
+        this.setState({ deploying: true });
+        await web3Scripts.deployContract({
+            Deployer: this.props.DeployerContract,
+            transactionStack: this.props.transactionStack,
+            transactions: this.props.transactions,
+            type: this.state.contractType,
+            fromAddress: this.props.selectedAccount,
+            args: { waitTime: this.state.waitTime },
+            notifier: notification
+        })
+        .catch((err) => notification['error']({
+            message: 'Deployment failed',
+            description: err.message || err
+        }))
+        this.setState({ deploying: false });
     }
 
     contractHelp() {
-        return FormHelp.deployer[this.state.contractType || ''];
+        return FormHelp.deployer.contractType[this.state.contractType || ''];
+    }
+
+    validateField (field) {
+        let status;
+        switch (field) {
+            case 'contractType':
+                status = ContractTypes.includes(this.state[field]);
+                break;
+            case 'waitTime':
+                status = this.state[field] > 0;
+                break;
+        }
+        this.state.formValidations[field] = status;
+        return this.state.formValidations[field];
+    }
+
+    validateStatus (field) {
+        if (this.state[field]) {
+            return this.validateField(field) ? 'success' : 'error';
+        } else {
+            return '';
+        }
+    }
+
+    validateForm () {
+        return Object.keys(this.state.formValidations).every( val => {
+            if (val === 'waitTime' && this.state.contractType === 'Wallet') {
+                return true;
+            } else {
+                return this.state.formValidations[val] === true;
+            }
+        })
     }
 
     handleChange = (field) => (e) => {
@@ -53,9 +106,9 @@ class Deployer extends Component {
                     <h2>Deploy { this.state.contractType } contract:</h2>
                 </Col>
                 <Col >
-                    <Form>
-                        <Item label='Contract Type' help={this.contractHelp()}>
-                            <Select onSelect={this.handleChange('contractType')} value={this.state.contractType} enum={ContractTypes}>
+                    <Form onSubmit={this.deployContract} >
+                        <Item label='Contract Type' help={this.contractHelp()} enum={ContractTypes} hasFeedback={true} validateStatus={this.validateStatus('contractType')} required>
+                            <Select onSelect={this.handleChange('contractType')} value={this.state.contractType}>
                                 {
                                     ContractTypes.map( (contractType) =>
                                         <Option key={contractType} value={contractType}> { contractType } </Option>
@@ -63,11 +116,18 @@ class Deployer extends Component {
                                 }
                             </Select>
                         </Item>
-                        { this.state.contractType !== 'Wallet' &&
-                            <Item label='Wait time'>
+                        { this.state.contractType && this.state.contractType !== 'Wallet' &&
+                            <Item label='Wait time' help={FormHelp.deployer.waitTime} hasFeedback={true} validateStatus={this.validateStatus('waitTime')} required>
                                 <Input onChange={this.handleChange('waitTime')} value={this.state.waitTime} />
                             </Item>
                         }
+                        <Item style={{ margin: '24px 0'}}>
+                            <Button type='primary' htmlType='submit' disabled={!this.props.selectedAccount || !this.validateForm() || this.state.deploying} >
+                                {this.state.deploying && <Icon type='loading'/>}
+                                {!this.state.deploying && <Icon type='upload'/>}
+                                Deploy
+                            </Button>
+                        </Item>
                     </Form>
                 </Col>
             </Row>
@@ -76,7 +136,10 @@ class Deployer extends Component {
 }
 
 Deployer.propTypes = {
-    // account: PropTypes.object.isRequired,
+    selectedAccount: PropTypes.string,
+    DeployerContract: PropTypes.object,
+    transactionStack: PropTypes.array,
+    transactions: PropTypes.object
 }
 
 export default Deployer;

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Switch, Redirect } from 'react-router';
 import { BrowserRouter, Route } from 'react-router-dom';
+import PropTypes from 'prop-types';
 
 import Accounts from "./Components/Accounts";
 import ContractsList from "./Components/ContractsList";
@@ -21,18 +22,20 @@ import 'antd/lib/row/style';
 const { Content } = Layout;
 
 import { drizzleConnect } from "drizzle-react";
-import { LoadingContainer, ContractData, ContractForm } from "drizzle-react-components";
+import { LoadingContainer } from "drizzle-react-components";
 
 class App extends Component {
-  constructor(props) {
+  constructor(props, context) {
     super(props);
-    this.state = {};
+    this.state = {
+      drizzle: context.drizzle
+    };
 
     this.updateSelectedAccount = this.updateSelectedAccount.bind(this);
   }
 
   updateSelectedAccount (event) {
-    this.setState({ selecedAccount: event.key });
+    this.setState({ selectedAccount: event.key });
   }
 
   render() {
@@ -52,7 +55,7 @@ class App extends Component {
                   <h1 className="App-title">Crypto will</h1>
               </Layout>
               <Layout>
-                <Accounts {...{ accounts: this.props.accounts, selected: this.state.selecedAccount, selectAccount: this.updateSelectedAccount }} />
+                <Accounts {...{ accounts: this.props.accounts, selected: this.state.selectedAccount, selectAccount: this.updateSelectedAccount }} />
               </Layout>
               <Layout>
                 <Content className="App-intro" style={{ margin: '0 56px' }}>
@@ -65,38 +68,37 @@ class App extends Component {
                       <Divider style={{ height: '2.5px', margin: '0' }} />
                     </Col>
                   </Row>
-                  { !this.state.selecedAccount &&
+                  { !this.state.selectedAccount &&
                     <Alert
                       description="Please select / Unlock an Account/Address to continue."
                       type="info"
                     />
                   }
-                  { this.state.selecedAccount &&
-                    <Row >
-                      <Col md={15} sm={24}  >
-                        <BrowserRouter sm={22} >
-                          <div>
-                            <Switch>
-                              <Redirect exact from='/' to='/deploy'></Redirect>
-                            </Switch>
-                            <Route path='/deploy' component={Deployer}></Route>
-                            <Route path='/contract' component={null}></Route>
-                          </div>
-                        </BrowserRouter >
+                  <Row >
+                    <Col md={15} sm={24}  >
+                      <BrowserRouter sm={22} >
+                        <div>
+                          <Switch>
+                            <Redirect exact from='/' to='/deploy'></Redirect>
+                          </Switch>
+                          <Route path='/deploy' render= {(props) => <Deployer {...props} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} transactionStack={this.props.transactionStack} transactions={this.props.transactions}/>} ></Route>
+                          <Route path='/contract' component={null}></Route>
+                        </div>
+                      </BrowserRouter >
+                    </Col>
+                    <Col md={1} sm={24} >
+                      <Col md={1} sm={0} >
+                          <Divider type='vertical' style={{ width: '2.5px', 'minHeight': '200px', 'marginLeft': '25px' }} />
                       </Col>
-                      <Col md={1} sm={24} >
-                        <Col md={1} sm={0} >
-                            <Divider type='vertical' style={{ width: '2.5px', 'minHeight': '200px', 'marginLeft': '25px' }} />
-                        </Col>
-                        <Col md={0} sm={24} >
-                          <Divider type='horizontal'style={{ height: '2.5px' }} />
-                        </Col>
+                      <Col md={0} sm={24} >
+                        <Divider type='horizontal'style={{ height: '2.5px' }} />
                       </Col>
-                      <Col md={8} sm={24}  >
-                        <ContractsList></ContractsList>
-                      </Col>
-                    </Row>
-                  }
+                    </Col>
+                    <Col md={8} sm={24}  >
+                      <ContractsList></ContractsList>
+                    </Col>
+                  </Row>
+                  { JSON.stringify(this.props.drizzleState) }
                 </Content>
               </Layout>
             </Content>
@@ -107,16 +109,17 @@ class App extends Component {
   }
 }
 
+App.contextTypes = {
+  drizzle: PropTypes.object
+}
+
 const mapStateToProps = state => {
   return {
     accounts: state.accounts,
     accountBalances: state.accountBalances,
     drizzleStatus: state.drizzleStatus,
-    drizzleState: state,
-    web3: state.web3,
-    Deployer: state.contracts.Deployer,
-    TutorialToken: state.contracts.TutorialToken,
-    // WillWallet: state.contracts.WillWallet
+    transactionStack: state.transactionStack,
+    transactions: state.transactions
   };
 };
 

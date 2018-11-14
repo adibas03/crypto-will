@@ -40,4 +40,3 @@ ReactDOM.render(
   </DrizzleProvider>,
   document.getElementById("root")
 );
-// registerServiceWorker();
