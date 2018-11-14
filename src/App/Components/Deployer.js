@@ -36,6 +36,7 @@ class Deployer extends Component {
             }
         };
         this.deployContract = this.deployContract.bind(this);
+        this.resetForm = this.resetForm.bind(this);
         this.validateField = this.validateField.bind(this);
         this.validateForm = this.validateForm.bind(this);
     }
@@ -50,7 +51,14 @@ class Deployer extends Component {
             type: this.state.contractType,
             fromAddress: this.props.selectedAccount,
             args: { waitTime: this.state.waitTime },
-            notifier: notification
+            onTransactionHash: (hash) => this.resetForm() && notification['success']({
+                message: 'Transaction sent',
+                description: hash
+            }),
+            onReceipt: (receipt) => notification['info']({
+                message: 'Transaction confirmed',
+                description: `HASH: ${receipt.transactionHash}, BLOCK: ${receipt.blockNumber}`
+            }),
         })
         .catch((err) => notification['error']({
             message: 'Deployment failed',
@@ -61,6 +69,14 @@ class Deployer extends Component {
 
     contractHelp() {
         return FormHelp.deployer.contractType[this.state.contractType || ''];
+    }
+
+    resetForm () {
+        this.setState({
+            contractType: '',
+            deploying: false
+        });
+        return true;
     }
 
     validateField (field) {

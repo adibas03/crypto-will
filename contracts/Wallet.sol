@@ -4,6 +4,7 @@ import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol
 
 /**
 * Wallet instantiation, is albe to run almost any Interaction: eth, toke, transactions
+* It is basically a minimalistic implementation of Proxy contract discussed in EIP 725 and EIP 1167
 */
 contract Wallet is Ownable {
 

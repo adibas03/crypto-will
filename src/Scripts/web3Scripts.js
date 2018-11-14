@@ -1,32 +1,32 @@
 const web3Scripts = {
-    async deployContract ({Deployer, transactionStack, transactions, fromAddress, type, args, notifier}) {
+    async deployContract ({Deployer, fromAddress, type, args, onTransactionHash, onReceipt}) {
         if (!Deployer) {
             throw('Deployer instance not available');
         }
-        console.log(Deployer, fromAddress, type, args)
-        console.log(transactionStack, transactions)
         let idx;
         try {
             switch (type) {
                 case 'Will':
-                    idx = await Deployer.methods.deployWill().send(
-                        args['waitTime'],
+                    idx = Deployer.methods.deployWill(args['waitTime']).send(
                         {
                             from: fromAddress
                         });
                     break;
                 case 'Wallet':
-                    // idx = await Deployer.methods.deployWallet().send({
-                    idx = await Deployer.methods.deployWallet.send({
+                    idx = Deployer.methods.deployWallet().send({
+                        from: fromAddress
+                    });
+                    break;
+                case 'WillWallet':
+                    idx = Deployer.methods.deployWillWallet(args['waitTime']).send({
                         from: fromAddress
                     });
                     break;
             }
-            if (transactionStack[idx]) {
-                this.awaitTransactionConfirmation(transactions, transactionStack[idx], notifier);
-            } else {
-                throw('Transaction details could not be retrieved');
-            }
+            idx
+            .on('transactionHash', onTransactionHash)
+            .on('receipt', onReceipt);
+            return idx;
         } catch (e) {
             throw e;
         }
