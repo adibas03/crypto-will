@@ -1,5 +1,18 @@
+import { Networks } from '../Config';
+
 const web3Scripts = {
-    async deployContract ({Deployer, fromAddress, type, args, onTransactionHash, onReceipt}) {
+    async getNetworkId (web3) {
+        const getID = web3.version.getNetwork || web3.eth.net.getId;
+        return new Promise((resolve, reject) => {
+            getID(function(err, res) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(res);
+            })
+        })
+    },
+    async deployContract ({ Deployer, fromAddress, type, args, onTransactionHash, onReceipt }) {
         if (!Deployer) {
             throw('Deployer instance not available');
         }
@@ -23,13 +36,35 @@ const web3Scripts = {
                     });
                     break;
             }
-            idx
-            .on('transactionHash', onTransactionHash)
-            .on('receipt', onReceipt);
+            this.setupListeners(idx, { onTransactionHash, onReceipt });
             return idx;
         } catch (e) {
             throw e;
         }
+    },
+    async fetchDeployments (Deployer, network, address, { onData, onChanged, onError }) {
+        const fromBlock = await this.getDeployedRBlock(Deployer, network);
+        if (fromBlock === null) {
+            throw new Error('Contract not deployed on network');
+        }
+        const event = Deployer.events.ContractDeployed({
+            filter: { creator: address },
+            fromBlock
+        })
+        this.setupListeners(event, { onData, onChanged, onError });
+        return event;
+    },
+    async getDeployedRBlock (Contract, network) {
+        const receipt = await this.getDeployedReceipt(Contract, network);
+        return (receipt && receipt.blockNumber) || null;
+    },
+    async getDeployedReceipt (Contract, network) {
+        const txHash = Contract.contractArtifact.networks[network].transactionHash;
+        const receipt = await Contract.web3.eth.getTransactionReceipt(txHash);
+        return receipt;
+    },
+    getNetwork (id) {
+        return Networks[id] || 'Unknown';
     },
     awaitTransactionConfirmation (transactions, idx, notifier, count=0) {
         const tx = transactions[idx];
@@ -50,7 +85,29 @@ const web3Scripts = {
 
     },
     watchWeb3Addresses (web3, ) {
-
+        web3
+    },
+    setupListeners (event, { onTransactionHash, onReceipt, onData, onChanged, onError }) {
+        if (onError) {
+            event
+            .on('error', onError);
+        }
+        if (onTransactionHash) {
+            event
+            .on('transactionHash', onTransactionHash);
+        }
+        if (onReceipt) {
+            event
+            .on('receipt', onReceipt);
+        }
+        if (onChanged) {
+            event
+            .on('changed', onChanged);
+        }
+        if (onData) {
+            event
+            .on('data', onData);
+        }
     }
 }
 

@@ -20,9 +20,9 @@
   "license": "ISC",
   "dependencies": {
     "antd": "3.10.0",
-    "drizzle": "^1.2.4",
-    "drizzle-react": "^1.2.0",
-    "drizzle-react-components": "^1.2.0",
+    "drizzle": "1.2.4",
+    "drizzle-react": "1.2.0",
+    "drizzle-react-components": "1.2.0",
     "prop-types": "^15.6.2",
     "react": "16.5.2",
     "react-dom": "16.5.2",

@@ -6,6 +6,7 @@ import { web3Scripts } from '../../Scripts';
 
 import Button from 'antd/lib/button';
 import Col from 'antd/lib/col';
+import Divider from 'antd/lib/divider';
 import Form from 'antd/lib/form';
 import Icon from 'antd/lib/icon';
 import Input from 'antd/lib/input';
@@ -15,6 +16,7 @@ import Select from 'antd/lib/select';
 
 import 'antd/lib/button/style';
 import 'antd/lib/col/style';
+import 'antd/lib/divider/style';
 import 'antd/lib/form/style';
 import 'antd/lib/icon/style';
 import 'antd/lib/input/style';
@@ -118,8 +120,9 @@ class Deployer extends Component {
     render () {
         return (
             <Row>
-                <Col span={24} style={{ margin: '10px 0'}}>
+                <Col span={24} style={{ margin: '0 0 24px' }}>
                     <h2>Deploy { this.state.contractType } contract:</h2>
+                    <Divider style={{ height: '1px', margin: '0' }} />
                 </Col>
                 <Col >
                     <Form onSubmit={this.deployContract} >

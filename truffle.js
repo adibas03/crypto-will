@@ -11,7 +11,6 @@
  *     gasPrice: 10000000000,
  *   },
  */
-const HDWalletProvider = require('truffle-hdwallet-provider');
 const MNEMONIC = 'tragic lab sheriff bag clump cabin arena head trophy exit traffic thrive napkin hurdle green';
 
 module.exports = {
@@ -26,6 +25,7 @@ module.exports = {
     ropsten: {
       network_id: 3,
       provider: function() {
+        const HDWalletProvider = require('truffle-hdwallet-provider');
         return new HDWalletProvider(MNEMONIC, 'https://ropsten.infura.io')
       },
       gasPrice: 10000000000,

@@ -26,6 +26,11 @@ class Accounts extends Component {
             </Menu>
         );
     }
+    componentDidMount () {
+        if (!this.props.selected && this.props.accounts && this.props.accounts.length > 0) {
+            this.props.selectAccount({ key: this.props.accounts[0] });
+        }
+    }
     
     render () {
         if (this.props.accounts) {
