@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import ErrorBoundary from "./ErrorBoundary";
 
 import { ContractTypes, FormHelp } from '../../Config';
 import { web3Scripts } from '../../Scripts';
@@ -161,4 +162,4 @@ Deployer.propTypes = {
     transactions: PropTypes.object
 }
 
-export default Deployer;
+export default ErrorBoundary(Deployer);

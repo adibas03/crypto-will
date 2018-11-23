@@ -5,9 +5,7 @@ import PropTypes from 'prop-types';
 
 import { web3Scripts } from '../Scripts';
 
-import Accounts from "./Components/Accounts";
-import ContractsList from "./Components/ContractsList";
-import Deployer from "./Components/Deployer";
+import { Accounts, Contract, ContractsList, Deployer }  from "./Components";
 
 import Alert from 'antd/lib/alert';
 import Col from 'antd/lib/col';
@@ -115,10 +113,10 @@ class App extends Component {
 
     return (
       <HashRouter basename='/'>
-        <Layout className="App">
-        { !drizzleStatus.initialized &&
-          <LoadingContainer>
-            <div></div>
+        <Layout className="App" style={{ minWidth: '576px', height: '100vh' }}>
+          { !drizzleStatus.initialized &&
+            <LoadingContainer>
+              <div></div>
           </LoadingContainer>
         }
         { drizzleStatus.initialized &&
@@ -145,13 +143,14 @@ class App extends Component {
                     </Col>
                   </Row>
                   { !this.state.selectedAccount &&
-                    <Alert
-                      description="Please select / Unlock an Account/Address to continue."
-                      type="info"
+                      <Alert
+                        description="Please select / Unlock an Account/Address to continue."
+                        type="info"
+                        style={{ margin: '24px 0' }}
                       />
                     }
                     <Row >
-                      <Col md={13} sm={24}  >
+                      <Col lg={13} md={24}  >
                         <Col sm={22} >
                           <div>
                             <Switch>
@@ -159,26 +158,27 @@ class App extends Component {
                               <Redirect exact from='/contract' to='/deploy'></Redirect>
                             </Switch>
                             <Route exact path='/deploy' render= {(props) => <Deployer {...props} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} transactionStack={this.props.transactionStack} transactions={this.props.transactions}/>} ></Route>
-                            <Route exact path='/contract/:id/' render={(props) => <div>contractAddress null {JSON.stringify(props)}</div>}></Route>
+                            <Route exact path='/contract/:contractAddress' render={(props) => <Contract {...props} selectedAccount={this.state.selectedAccount} />}></Route>
                           </div>
                         </Col >
                       </Col>
-                      <Col md={1} sm={24} >
-                        <Col md={1} sm={0} >
-                          <Divider type='vertical' style={{ width: '2.5px', 'minHeight': '200px', 'marginLeft': '25px' }} />
+                      <Col lg={1} md={24} >
+                        <Col lg={1} md={0} >
+                            <Divider type='vertical' style={{ width: '2.5px', 'minHeight': '200px', 'marginLeft': '25px' }} />
+                        </Col>
+                        <Col lg={0} md={24} >
+                          <Divider type='horizontal'style={{ height: '2.5px' }} />
+                        </Col>
                       </Col>
-                      <Col md={0} sm={24} >
-                        <Divider type='horizontal'style={{ height: '2.5px' }} />
-                      </Col>
-                    </Col>
-                      <Col md={10} sm={24}  >
+                      <Col lg={10} md={24}  >
                         <ContractsList networkUpdated={this.callOnNetworkUpdate} networkId={this.state.activeNetworkId} accountUpdated={this.callOnAccountUpdate} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} ></ContractsList>
-                    </Col>
-                  </Row>
-                  { JSON.stringify(this.props.drizzleState) }
-                </Content>
-              </Layout>
-            </Content>
+                      </Col>
+                    </Row>
+                    { JSON.stringify(this.props.drizzleStatus) }
+                    {this.state.selectedAccount}
+                  </Content>
+                </Layout>
+              </Content>
           </Layout>
         }
       </Layout>

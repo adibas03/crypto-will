@@ -1,5 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
+import ErrorBoundary from "./ErrorBoundary";
+
 import Button from 'antd/lib/button';
 import Dropdown from 'antd/lib/dropdown';
 import Icon from 'antd/lib/icon';
@@ -26,11 +28,6 @@ class Accounts extends Component {
             </Menu>
         );
     }
-    componentDidMount () {
-        if (!this.props.selected && this.props.accounts && this.props.accounts.length > 0) {
-            this.props.selectAccount({ key: this.props.accounts[0] });
-        }
-    }
     
     render () {
         if (this.props.accounts) {
@@ -56,4 +53,4 @@ Accounts.propTypes = {
     selected: PropTypes.string
 }
 
-export default Accounts;
+export default ErrorBoundary(Accounts);

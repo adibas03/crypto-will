@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Link, NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
+import ErrorBoundary from "./ErrorBoundary";
 
 import { web3Scripts } from '../../Scripts';
 
@@ -19,9 +20,8 @@ import 'antd/lib/icon/style';
 import 'antd/lib/layout/style';
 import 'antd/lib/notification/style';
 import 'antd/lib/row/style';
-import { Explorers } from "../../Config";
 
-const { Header, Content, Sider } = Layout;
+import { Explorers } from "../../Config";
 
 class ContractsList extends Component {
     state = {
@@ -178,4 +178,4 @@ ContractsList.propTypes = {
     networkUpdated: PropTypes.func
 }
 
-export default ContractsList;
+export default ErrorBoundary(ContractsList);
