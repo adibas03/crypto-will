@@ -45,6 +45,13 @@ class ContractsList extends Component {
         return !!this.state.runningSubscription;
     }
 
+    get displayList () {
+        return this.props.foundContracts.sort(
+            function compareNumbers(a, b) {
+                return b.blockNumber - a.blockNumber;
+            });
+    }
+
     accountUpdated () {
         if (!this._mounted) {
             return;
@@ -77,8 +84,7 @@ class ContractsList extends Component {
         try {
             const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, this.state.activeAccount, {
                 onData: (event) => {
-                    console.log(event)
-                    this.state.foundContracts.push(event);
+                    this.props.foundNewContract(event);
                     this.forceUpdate();
                 },
                 onChanged: (event) => console.log('Changed', event)
@@ -108,27 +114,27 @@ class ContractsList extends Component {
     
     render () {
         return (
-            <div>
+            <Layout>
                 <Row gutter={0} style={{ margin: '0 0 24px' }}>
                     <Col span={20}>
-                        <h2>Contracts List</h2>
+                        <h2>Deployed Contracts</h2>
                         <Divider style={{ height: '1px', margin: '0' }} />
                     </Col>
                     <Col span={4}>
                         <Row gutter={0} justify='center'>
                             <Col span={11} >
-                                <NavLink to='/' title='New contract' >
+                                <NavLink to='/deploy' title='New contract' >
                                     <Icon type='plus-square' style={{ fontSize: '28px' }} />
                                 </NavLink>
                             </Col>
                             <Col span={11} >
-                                <h3>: { this.state.fetchingContracts ? '...' : this.state.foundContracts.length }</h3>
+                                <h3>: { this.state.fetchingContracts ? '...' : this.props.foundContracts.length }</h3>
                             </Col>
                         </Row>
                     </Col>
                 </Row>
-                <div>
-                    {this.state.foundContracts.map( (contract, index) => {
+                <Layout style={{ overflowY: 'auto', maxHeight: '900px' }}>
+                    {this.displayList.map( (contract, index) => {
                         return (
                             <div key={index}>
                                 <Card
@@ -139,34 +145,35 @@ class ContractsList extends Component {
                                     style={{ background: 'transparent' }}
                                     headStyle={{ background: '#dedede' }}
                                     extra={
-                                        <Link title='Block Explorer' to={ Explorers[this.props.networkId] ? `${Explorers[this.props.networkId]}address/${contract.returnValues.contractAddress}` : '' }>
+                                        <a title='Block Explorer' target='_blank' href={ Explorers[this.props.networkId] ? `${Explorers[this.props.networkId]}/address/${contract.returnValues.contractAddress}` : '#' }>
                                             <Icon type='cluster' style={{ fontSize: '24px' }}/>
-                                        </Link>}
+                                        </a>}
                                 >
-                                    <div>
-                                        <Row>
-                                            <Col span={5}>
-                                                <h4>Type:</h4>
-                                            </Col>
-                                            <Col span={19} className='word-wrapped'>{ contract.returnValues.contractType }</Col>
-                                        </Row>
-                                    </div>
-                                    <div>
-                                        <Row>
-                                            <Col span={5}>
-                                                <h4>Transaction:</h4>
-                                            </Col>
-                                            <Col span={19} className='word-wrapped'>{ contract.transactionHash }</Col>
-                                        </Row>
-                                    </div>
-                                    { JSON.stringify(contract)}
+                                    <Row>
+                                        <Col span={5}>
+                                            <h4>Type:</h4>
+                                        </Col>
+                                        <Col span={19} className='word-wrapped'>{ contract.returnValues.contractType }</Col>
+                                    </Row>
+                                    <Row>
+                                        <Col span={5}>
+                                            <h4>Block:</h4>
+                                        </Col>
+                                        <Col span={19} className='word-wrapped'>{ contract.blockNumber }</Col>
+                                    </Row>
+                                    <Row>
+                                        <Col span={5}>
+                                            <h4>Transaction:</h4>
+                                        </Col>
+                                        <Col span={19} className='word-wrapped'>{ contract.transactionHash }</Col>
+                                    </Row>
                                 </Card>
                             </div>
                         );
                     })}
-                </div>
+                </Layout>
                 
-            </div>
+            </Layout>
         );
     }
 }
@@ -175,6 +182,8 @@ ContractsList.propTypes = {
     selectedAccount: PropTypes.string,
     DeployerContract: PropTypes.object,
     accountUpdated: PropTypes.func,
+    foundcontracts: PropTypes.array,
+    foundNewContract: PropTypes.func.isRequired,
     networkUpdated: PropTypes.func
 }
 

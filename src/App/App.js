@@ -31,12 +31,14 @@ class App extends Component {
       drizzle: context.drizzle,
       fetchingNetwork: false,
       accountUpdatedCalls: [],
+      ContractsList: [],
       networkUpdatedCalls: []
     };
 
     this.updateSelectedAccount = this.updateSelectedAccount.bind(this);
     this.callOnAccountUpdate = this.callOnAccountUpdate.bind(this);
     this.callOnNetworkUpdate = this.callOnNetworkUpdate.bind(this);
+    this.foundContractAddress = this.foundContractAddress.bind(this);
   }
 
   async getNetwork() {
@@ -60,14 +62,6 @@ class App extends Component {
     });
   }
 
-  updateSelectedAccount (event) {
-    if (this._mounted) {
-      this.setState({ selectedAccount: event.key }, () => {
-        this.accountUpdated(this.state.selectedAccount);
-      });
-    }
-  }
-
   runNetworkWatcher () {
     const networkInterval = setInterval ( () => {
       const { drizzleStatus } = this.props;
@@ -76,6 +70,20 @@ class App extends Component {
       }
     }, 1000);
     this.setState({ networkInterval })
+  }
+
+  updateSelectedAccount (event) {
+    if (this._mounted) {
+      this.setState({ selectedAccount: event.key, ContractsList: [] }, () => {
+        this.accountUpdated(this.state.selectedAccount);
+      });
+    }
+  }
+
+  foundContractAddress (deployLog) {
+    if (this._mounted) {
+      this.state.ContractsList.push(deployLog);
+    }
   }
 
   callOnNetworkUpdate (fn) {
@@ -113,7 +121,7 @@ class App extends Component {
 
     return (
       <HashRouter basename='/'>
-        <Layout className="App" style={{ minWidth: '576px', height: '100vh' }}>
+        <Layout className="App" style={{ minWidth: '576px', maxHeight: '100vh', overflowY: 'hidden' }}>
           { !drizzleStatus.initialized &&
             <LoadingContainer>
               <div></div>
@@ -171,7 +179,7 @@ class App extends Component {
                         </Col>
                       </Col>
                       <Col lg={10} md={24}  >
-                        <ContractsList networkUpdated={this.callOnNetworkUpdate} networkId={this.state.activeNetworkId} accountUpdated={this.callOnAccountUpdate} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} ></ContractsList>
+                        <ContractsList networkUpdated={this.callOnNetworkUpdate} networkId={this.state.activeNetworkId} accountUpdated={this.callOnAccountUpdate} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} foundNewContract={this.foundContractAddress} foundContracts={this.state.ContractsList} ></ContractsList>
                       </Col>
                     </Row>
                     { JSON.stringify(this.props.drizzleStatus) }
