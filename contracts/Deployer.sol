@@ -10,7 +10,7 @@ contract Deployer is Pausable {
   }
 
   enum ContractTypes { will, wallet, willwallet }
-  event ContractDeployed(string _type, address _contract, address indexed creator);
+  event ContractDeployed(string contractType, address indexed contractAddress, address indexed creator);
 
   function _transferOwnership(address _contract, address _newOwner)
   internal

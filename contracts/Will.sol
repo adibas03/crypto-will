@@ -12,10 +12,10 @@ contract Will is Ownable {
   uint256 constant decimals = 8; //Allow fractions for disposition
   uint256 waitingTime; //How long to wait before initiating distribution
   uint256 lastInteraction; //Last time contract was interacted with
-  address[] beneficiaries; //Address for each beneficiary
-  mapping( address => uint256) disposition; //Percentage of total balacne to be sent to each beneficiary
+  address[] public beneficiaries; //Address for each beneficiary
+  mapping( address => uint256) public disposition; //Percentage of total balacne to be sent to each beneficiary
 
-  event BeneficiaryUpdated( address _beneficiary, uint256 _disposition, uint256 _timestamp); //Notify of update to beneficiaries / disposition
+  event BeneficiaryUpdated( address beneficiary, uint256 disposition, uint256 timestamp); //Notify of update to beneficiaries / disposition
 
   constructor (uint256 _waitTime )
     public
@@ -29,6 +29,12 @@ contract Will is Ownable {
     public pure
   returns (uint) {
     return 10**decimals;
+  }
+
+  function totalBeneficiaries ()
+    public view
+  returns (uint) {
+    return beneficiaries.length;
   }
 
   function totalDisposed ()
