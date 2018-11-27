@@ -63,6 +63,10 @@ class App extends Component {
   }
 
   runNetworkWatcher () {
+    if (this.state.networkInterval) {
+      clearInterval(this.state.networkInterval);
+    }
+
     const networkInterval = setInterval ( () => {
       const { drizzleStatus } = this.props;
       if (drizzleStatus.initialized && !this.state.activeNetwork) {
@@ -166,7 +170,7 @@ class App extends Component {
                               <Redirect exact from='/contract' to='/deploy'></Redirect>
                             </Switch>
                             <Route exact path='/deploy' render= {(props) => <Deployer {...props} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} transactionStack={this.props.transactionStack} transactions={this.props.transactions}/>} ></Route>
-                            <Route exact path='/contract/:contractAddress' render={(props) => <Contract {...props} selectedAccount={this.state.selectedAccount} />}></Route>
+                            <Route exact path='/contract/:contractAddress' render={(props) => <Contract {...props} networkId={this.state.activeNetworkId} selectedAccount={this.state.selectedAccount} drizzle={this.state.drizzle} contractsList={this.state.ContractsList}/>}></Route>
                           </div>
                         </Col >
                       </Col>
@@ -178,7 +182,7 @@ class App extends Component {
                           <Divider type='horizontal'style={{ height: '2.5px' }} />
                         </Col>
                       </Col>
-                      <Col lg={10} md={24}  >
+                      <Col lg={10} md={24} >
                         <ContractsList networkUpdated={this.callOnNetworkUpdate} networkId={this.state.activeNetworkId} accountUpdated={this.callOnAccountUpdate} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} foundNewContract={this.foundContractAddress} foundContracts={this.state.ContractsList} ></ContractsList>
                       </Col>
                     </Row>

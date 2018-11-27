@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import { Link, NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
+import NetworkComponent from "./NetworkComponent";
 
 import { web3Scripts } from '../../Scripts';
 
@@ -82,7 +83,7 @@ class ContractsList extends Component {
         }
         this.setState({ fetchingContracts: true });
         try {
-            const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, this.state.activeAccount, {
+            const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, { creator: this.state.activeAccount }, {
                 onData: (event) => {
                     this.props.foundNewContract(event);
                     this.forceUpdate();
@@ -184,7 +185,8 @@ ContractsList.propTypes = {
     accountUpdated: PropTypes.func,
     foundcontracts: PropTypes.array,
     foundNewContract: PropTypes.func.isRequired,
+    networkId: PropTypes.number,
     networkUpdated: PropTypes.func
 }
 
-export default ErrorBoundary(ContractsList);
+export default ErrorBoundary(NetworkComponent(ContractsList));

@@ -42,15 +42,37 @@ const web3Scripts = {
             throw e;
         }
     },
-    async fetchDeployments (Deployer, network, address, { onData, onChanged, onError }) {
-        const fromBlock = await this.getDeployedRBlock(Deployer, network);
+    async requireFromBlock (Contract, network) {
+        const fromBlock = await this.getDeployedRBlock(Contract, network);
         if (fromBlock === null) {
             throw new Error('Contract not deployed on network');
         }
-        const event = Deployer.events.ContractDeployed({
-            filter: { creator: address },
-            fromBlock
-        })
+        return fromBlock;
+    },
+    async getDeploymentReceipt (Deployer, network, contractAddress) {
+        const fromBlock = await this.requireFromBlock(Deployer, network);
+        return new Promise ((resolve, reject) => {
+            this.truffleSubscribeOnceEvent(
+                Deployer,
+                'ContractDeployed',
+                fromBlock,
+                (event) => {
+                    resolve(event);
+                },
+                {
+                    contractAddress
+                }
+                )
+        });
+    },
+    async fetchDeployments (Deployer, network, filter, { onData, onChanged, onError }) {
+        const fromBlock = await this.requireFromBlock(Deployer, network);
+        const event = this.subscribeEvents(
+            Deployer,
+            'ContractDeployed',
+            fromBlock,
+            filter
+        );
         this.setupListeners(event, { onData, onChanged, onError });
         return event;
     },
@@ -62,6 +84,46 @@ const web3Scripts = {
         const txHash = Contract.contractArtifact.networks[network].transactionHash;
         const receipt = await Contract.web3.eth.getTransactionReceipt(txHash);
         return receipt;
+    },
+    // async fetchPastEvents ( Contract, event, fromBlock, filter={}, topics=[]) {
+    //     return Contract.getPastEvents(
+    //         event,
+    //         fromBlock,
+    //         filter,
+    //         topics
+    //     );
+    // },
+    async unsubscribeEvent (event) {
+        return await event.unsubscribe();
+    },
+    truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {
+        const tEvent = Contract.events[event]({
+            fromBlock,
+            filter,
+            topics
+        });
+        tEvent.on('data', async (data) => {
+            onData(data);
+            await this.unsubscribeEvent(tEvent);
+        })
+        return tEvent;
+    },
+    // subscribeOnceEvent ( Contract, event, fromBlock, onData, filter={}, topics=[]) {
+    //     return Contract.once(
+    //         event, {
+    //             fromBlock,
+    //             filter,
+    //             topics
+    //         },
+    //         onData
+    //     );
+    // },
+    subscribeEvents ( Contract, event, fromBlock, filter={}, topics=[]) {
+        return Contract.events[event]({
+            fromBlock,
+            filter,
+            topics
+        });
     },
     getNetwork (id) {
         return Networks[id] || 'Unknown';
@@ -82,7 +144,6 @@ const web3Scripts = {
                 description: `${idx} successfully confirmed`
             });
         }
-
     },
     watchWeb3Addresses (web3, ) {
         web3
