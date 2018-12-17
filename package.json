@@ -29,7 +29,8 @@
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
     "redux": "^4.0.1",
-    "truffle-hdwallet-provider": "0.0.6"
+    "truffle-hdwallet-provider": "0.0.6",
+    "zeppelin-solidity": "^1.12.0"
   },
   "devDependencies": {
     "babel-core": "^6.26.3",
