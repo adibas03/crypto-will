@@ -1,9 +1,11 @@
-pragma solidity ^0.4.23;
+pragma solidity ^0.4.24;
 
-import './Ownable.sol';
+import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol";
 
 /**
-* Wallet instantiation, is albe to run almost any Interaction: eth, toke, transactions
+* Wallet instantiation, is able to run almost any Interaction: eth, token, transactions
+* It is basically a minimalistic implementation of Proxy contract discussed
+* The owner of the contract can be set as an Identity contract like EIP 725 and increse the possibilities
 */
 contract Wallet is Ownable {
 
