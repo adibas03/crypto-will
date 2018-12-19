@@ -27,7 +27,8 @@ class Contract extends Component {
 
     state= {
         contract: {},
-        deploymentReceipt: null
+        deploymentReceipt: null,
+        fetchingReceipt: false
     }
 
     get contractHasBeneficiaries () {
@@ -65,12 +66,13 @@ class Contract extends Component {
     }
 
     async fetchDeploymentReceipt (contractAddress) {
-        if (this.deploymentReceiptExists()) {
+        if (this.deploymentReceiptExists() || this.state.fetchingReceipt) {
             return true;
         }
+        this.setState({ fetchingReceipt: true });
         const { Deployer } = this.props.drizzle.contracts;
         const receipt = await web3Scripts.getDeploymentReceipt(Deployer, this.props.networkId, contractAddress);
-        return this.setState({ deploymentReceipt: receipt }, () => true);
+        return this.setState({ deploymentReceipt: receipt, fetchingReceipt: false }, () => true);
     }
 
     async resolveContractDeploymentReceipt (address) {

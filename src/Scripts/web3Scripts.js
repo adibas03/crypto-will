@@ -97,11 +97,13 @@ const web3Scripts = {
         return await event.unsubscribe();
     },
     truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {
-        const tEvent = Contract.events[event]({
-            fromBlock,
-            filter,
-            topics
-        });
+        const subObject = { fromBlock, filter };
+
+        if (topics.length > 0) {
+            subObject.topics = topics;
+        }
+
+        const tEvent = Contract.events[event](subObject);
         tEvent.on('data', async (data) => {
             onData(data);
             await this.unsubscribeEvent(tEvent);
