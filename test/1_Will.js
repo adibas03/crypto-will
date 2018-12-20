@@ -5,6 +5,6 @@ contract ('Will', function (accounts) {
   let will;
 
   before(function () {
-    // const will = await 
+    // const will = await
   })
 })
