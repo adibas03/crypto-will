@@ -13,7 +13,9 @@ contract Will is Ownable {
   uint256 waitingTime; //How long to wait before initiating distribution
   uint256 lastInteraction; //Last time contract was interacted with
   address[] public beneficiaries; //Address for each beneficiary
-  mapping( address => uint256) public disposition; //Percentage of total balacne to be sent to each beneficiary
+  mapping( address => uint256) public disposition; //List of ratio of contract balance to sent to each beneficiary
+  mapping(address => bool) public beneficiaryExists; //Boolean to indicate that address exists as beneficiary
+  mapping(address => uint256) beneficiaryIndex; //Mapping of beneficiary to index in beneficiaries list
 
   event BeneficiaryUpdated( address beneficiary, uint256 disposition, uint256 timestamp); //Notify of update to beneficiaries / disposition
 
@@ -27,7 +29,7 @@ contract Will is Ownable {
 
   function unit ()
     public pure
-  returns (uint) {
+  returns (uint256) {
     return 10**decimals;
   }
 
@@ -37,13 +39,20 @@ contract Will is Ownable {
     return beneficiaries.length;
   }
 
+  function dispositionSum ()
+    public view
+  return (uint256 _sum) {
+    for (uint256 i=0; i<beneficiaries.length; i++){
+      _sum.add(disposition[ beneficiaries[i] ]);
+    }
+  }
+
   function totalDisposed ()
     public view
   returns (uint256 _total) {//Total amount already disposed
     for (uint256 i=0; i<beneficiaries.length; i++){
       _total.add(disposition[ beneficiaries[i] ].div(unit()));
     }
-    return _total;
   }
 
   function isDispositionDue ()
@@ -55,19 +64,17 @@ contract Will is Ownable {
   function getBeneficiaryIndex (address _beneficiary)
     public view
   returns (uint256){
-    for (uint256 _b=0; _b<beneficiaries.length; _b++) {
-      if (beneficiaries[_b] == _beneficiary) {
-        return _b;
-      }
-    }
-    return 0;
+    return beneficiaryIndex[_beneficiary];
   }
 
-  function addBeneficiary (address _beneficiary, uint256 _disposition)
-    public onlyOwner
+  function _addBeneficiary (address _beneficiary, uint256 _disposition)
+    internal onlyOwner
+  returns (bool)
   {
-    require(_beneficiary != 0x0);
-    require(getBeneficiaryIndex(_beneficiary) == 0);
+    require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
+    require(beneficiaryExists[_beneficiary] == fase, 'Cannot add existing beneficiary Anew, use update');
+    beneficiaryExists[_beneficiary] = true;
+    beneficiaryIndex[_beneficiary] = _beneficiary.length;
     disposition[_beneficiary] = _disposition;
     beneficiaries.push(_beneficiary);
     emit BeneficiaryUpdated(_beneficiary, _disposition, block.timestamp);
@@ -75,39 +82,77 @@ contract Will is Ownable {
 
   function updateBeneficiary (address _beneficiary, uint256 _disposition)
     public onlyOwner
+  returns (bool)
   {
-    require(_beneficiary != 0x0);
+    require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
+    require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
     if (getBeneficiaryIndex(_beneficiary) == 0) {
-      return addBeneficiary(_beneficiary,_disposition);
+      return _addBeneficiary(_beneficiary,_disposition);
     } else {
       disposition[_beneficiary] = _disposition;
       emit BeneficiaryUpdated(_beneficiary, _disposition, block.timestamp);
+      return true;
     }
+  }
+
+  // Update batch of up to Ten (10) beneficiaries, beneficiary must have corresponding index for disposition in _dispositions
+  function updateBeneficiaries (address[10] _beneficiaries, uint256[10] _dispositions)
+    public onlyOwner
+  returns (bool)
+  {
+    uint256 maxLength = 10;
+
+    for (uint256 i=0; i<maxLength; i++) {
+      if (_beneficiaries[i] != 0x0) {
+        updateBeneficiary(_beneficiaries[i], _dispositions[i]);
+      }
+    }
+    return true;
   }
 
   function removeBeneficiary (address _beneficiary)
     public onlyOwner
   {
-    require(_beneficiary != 0x0);
+    require(_beneficiary != 0x0, 'Provide a beneficiary address to remove');
+    require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
+
     uint256 idx = getBeneficiaryIndex(_beneficiary);
 
-    assert(beneficiaries[idx] == _beneficiary);
+    assert(beneficiaries[idx] == _beneficiary, 'Beneficiary not successfully located, try again');
     require(idx != 0);//Ensure  first beneficiary can never be removed
 
     delete(disposition[_beneficiary]);
     beneficiaries[idx] = beneficiaries[ beneficiaries.length-1 ];
     delete(beneficiaries[beneficiaries.length-1]);
     beneficiaries.length--;
+    delete(beneficiaryIndex[_beneficiary]);
+    delete(beneficiaryExists[_beneficiary]);
     emit BeneficiaryUpdated(_beneficiary, 0, block.timestamp);
   }
+
+  //Remove up to Ten(10) beneficiaries
+  function removeBeneficiaries (address[10] _beneficiaries)
+      public onlyOwner
+    {
+      uint256 maxLength = 10;
+
+      for (uint256 i=0; i<maxLength; i++) {
+        if (_beneficiaries[i] != 0x0) {
+          removeBeneficiary(_beneficiaries[i]);
+        }
+      }
+      return true;
+    }
 
   function triggerDisposition () //Send balances to beneficiaries and send remainder to contract creator
     public
   {
-    require(isDispositionDue());
+    require(isDispositionDue(), 'Will is not yet due for disposition');
     uint256 _balance = address(this).balance;
+    uint256 _dispositionSum = dispositionSum();
+    uint256 _unit = unit();
     for (uint256 _b=1;_b<beneficiaries.length;_b++) {
-      beneficiaries[_b].transfer( _balance.mul(disposition[beneficiaries[_b]]).div(unit()) );
+      beneficiaries[_b].transfer( _balance.mul(disposition[beneficiaries[_b]] ).div(_dispositionSum).div(_unit) );
     }
     beneficiaries[0].transfer(address(this).balance);
   }
