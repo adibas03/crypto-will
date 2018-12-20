@@ -28,14 +28,30 @@ import 'antd/lib/select/style';
 const { Item } = Form;
 const { Option } = Select;
 
+const timeSpans = [
+    'second',
+    'day',
+    'month',
+    'year'
+];
+
+const timeSpansFactors = {
+    second: 1,
+    day: 86400,
+    month: 2592000,
+    year: 31536000
+
+};
 
 class Deployer extends Component {
     constructor (props) {
         super(props);
         this.state = {
+            timeSpan: timeSpans[0],
             formValidations: {
                 contractType: false,
-                waitTime: false
+                waitTime: false,
+                timeSpan: true
             }
         };
         this.deployContract = this.deployContract.bind(this);
@@ -53,7 +69,7 @@ class Deployer extends Component {
             transactions: this.props.transactions,
             type: this.state.contractType,
             fromAddress: this.props.selectedAccount,
-            args: { waitTime: this.state.waitTime },
+            args: { waitTime: this.state.waitTime * timeSpansFactors[this.state.timeSpan] },
             onTransactionHash: (hash) => this.resetForm() && notification['success']({
                 message: 'Transaction sent',
                 description: hash
@@ -70,6 +86,18 @@ class Deployer extends Component {
         this.setState({ deploying: false });
     }
 
+    get timeSpanSelect () {
+        return (
+            <Select onSelect={this.handleChange('timeSpan')} value={this.state.timeSpan}>
+                {
+                    timeSpans.map( (timeSpan) =>
+                        <Option key={timeSpan} value={timeSpan}> { timeSpan.charAt(0).toUpperCase() + timeSpan.slice(1) + '(s)' } </Option>
+                    )
+                }
+            </Select>
+        );
+    }
+
     contractHelp() {
         return FormHelp.deployer.contractType[this.state.contractType || ''];
     }
@@ -77,6 +105,7 @@ class Deployer extends Component {
     resetForm () {
         this.setState({
             contractType: '',
+            timeSpan: timeSpans[0],
             deploying: false
         });
         return true;
@@ -90,6 +119,9 @@ class Deployer extends Component {
                 break;
             case 'waitTime':
                 status = this.state[field] > 0;
+                break;
+            case 'timeSpan':
+                status = timeSpans.includes(this.state[field]);
                 break;
         }
         this.state.formValidations[field] = status;
@@ -138,7 +170,7 @@ class Deployer extends Component {
                         </Item>
                         { this.state.contractType && this.state.contractType !== 'Wallet' &&
                             <Item label='Wait time' help={FormHelp.deployer.waitTime} hasFeedback={true} validateStatus={this.validateStatus('waitTime')} required>
-                                <Input onChange={this.handleChange('waitTime')} value={this.state.waitTime} />
+                                <Input onChange={this.handleChange('waitTime')} value={this.state.waitTime} addonAfter={this.timeSpanSelect}/>
                             </Item>
                         }
                         <Item style={{ margin: '24px 0'}}>
