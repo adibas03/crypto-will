@@ -41,7 +41,7 @@ contract Will is Ownable {
 
   function dispositionSum ()
     public view
-  return (uint256 _sum) {
+  returns (uint256 _sum) {
     for (uint256 i=0; i<beneficiaries.length; i++){
       _sum.add(disposition[ beneficiaries[i] ]);
     }
@@ -72,9 +72,9 @@ contract Will is Ownable {
   returns (bool)
   {
     require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
-    require(beneficiaryExists[_beneficiary] == fase, 'Cannot add existing beneficiary Anew, use update');
+    require(beneficiaryExists[_beneficiary] == false, 'Cannot add existing beneficiary Anew, use update');
     beneficiaryExists[_beneficiary] = true;
-    beneficiaryIndex[_beneficiary] = _beneficiary.length;
+    beneficiaryIndex[_beneficiary] = beneficiaries.length;
     disposition[_beneficiary] = _disposition;
     beneficiaries.push(_beneficiary);
     emit BeneficiaryUpdated(_beneficiary, _disposition, block.timestamp);
