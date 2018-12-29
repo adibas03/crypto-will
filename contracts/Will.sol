@@ -9,11 +9,14 @@ import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol
 contract Will is Ownable {
   using SafeMath for uint;
 
-  uint256 constant decimals = 8; //Allow fractions for disposition
+  uint256 constant ONE = 1; //Constant representation of 1
+  uint256 constant public decimals = 8; //Allow fractions for disposition
+  uint256 constant public maxArrayLength = 10; //Maximum length of array for functions that accept arrays
 
   bool public disbursed; //Whether the contract has Disposed at least once
+  bool public disbursing; //Whether the contract is pressently running a disbursement
   uint256 waitingTime; //How long to wait before initiating distribution
-  uint256 lastInteraction; //Last time contract was interacted with
+  uint256 public lastInteraction; //Last time contract was interacted with
   address[] public beneficiaries; //Address for each beneficiary
   mapping( address => uint256) public disposition; //List of ratio of contract balance to sent to each beneficiary
   mapping(address => bool) public beneficiaryExists; //Boolean to indicate that address exists as beneficiary
@@ -45,8 +48,8 @@ contract Will is Ownable {
   function dispositionSum ()
     public view
   returns (uint256 _sum) {
-    for (uint256 i=0; i<beneficiaries.length; i++){
-      _sum.add(disposition[ beneficiaries[i] ]);
+    for (uint256 i=1; i<beneficiaries.length; i++) {
+      _sum = _sum.add(disposition[ beneficiaries[i] ]);
     }
   }
 
@@ -60,6 +63,12 @@ contract Will is Ownable {
     public view
   returns (uint256){
     return beneficiaryIndex[_beneficiary];
+  }
+
+  function _calcDispositionDue (address _beneficiary, uint256 _totalBalance, uint256 _dispositionSum)
+    internal view
+  returns (uint256){
+    return (_totalBalance.mul(disposition[_beneficiary] )).div(_dispositionSum).div(unit());
   }
 
   function _addBeneficiary (address _beneficiary, uint256 _disposition)
@@ -96,9 +105,8 @@ contract Will is Ownable {
     public onlyOwner
   returns (bool)
   {
-    uint256 maxLength = 10;
 
-    for (uint256 i=0; i<maxLength; i++) {
+    for (uint256 i=0; i<maxArrayLength; i++) {
       if (_beneficiaries[i] != 0x0) {
         updateBeneficiary(_beneficiaries[i], _dispositions[i]);
       }
@@ -108,6 +116,7 @@ contract Will is Ownable {
 
   function removeBeneficiary (address _beneficiary)
     public onlyOwner
+  returns (bool)
   {
     require(_beneficiary != 0x0, 'Provide a beneficiary address to remove');
     require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
@@ -115,24 +124,29 @@ contract Will is Ownable {
     uint256 idx = getBeneficiaryIndex(_beneficiary);
 
     assert(beneficiaries[idx] == _beneficiary);
-    require(idx != 0);//Ensure  first beneficiary can never be removed
+    require(idx != 0, 'You can not remove the creator as a beneficiary');//Ensure  first beneficiary can never be removed
 
+    //Remove beneficiary
     delete(disposition[_beneficiary]);
-    beneficiaries[idx] = beneficiaries[ beneficiaries.length-1 ];
-    delete(beneficiaries[beneficiaries.length-1]);
-    beneficiaries.length--;
     delete(beneficiaryIndex[_beneficiary]);
     delete(beneficiaryExists[_beneficiary]);
+
+    // Rearrange indexes
+    beneficiaries[idx] = beneficiaries[ beneficiaries.length.sub(ONE) ];
+    beneficiaryIndex[ beneficiaries[idx] ] = idx;
+    delete(beneficiaries[beneficiaries.length.sub(ONE)]);
+    beneficiaries.length--;
+
     emit BeneficiaryUpdated(_beneficiary, 0);
+    return true;
   }
 
   //Remove up to Ten(10) beneficiaries
   function removeBeneficiaries (address[10] _beneficiaries)
       public onlyOwner
   returns (bool) {
-    uint256 maxLength = 10;
 
-    for (uint256 i=0; i<maxLength; i++) {
+    for (uint256 i=0; i<maxArrayLength; i++) {
       if (_beneficiaries[i] != 0x0) {
         removeBeneficiary(_beneficiaries[i]);
       }
@@ -140,9 +154,9 @@ contract Will is Ownable {
     return true;
   }
 
-  //Reset the Wait Time, and push Disposition forward by another waitTime cycle
+  //Reset the Wait Time, by pushing Disposition forward by another waitTime cycle
   function postpone ()
-    public onlyOwner
+    public payable onlyOwner
   returns (bool) {
     lastInteraction = now;
     return true;
@@ -153,25 +167,38 @@ contract Will is Ownable {
     public
   {
     require(isDispositionDue(), 'Will is not yet due for disposition');
+    require(disbursing == false, 'An instance of disbursement is already running');
+    disbursing = true;
+
+    uint256 amountDue = 0;
     uint256 _balance = address(this).balance;
     uint256 _dispositionSum = dispositionSum();
-    uint256 _unit = unit();
     disbursed = true;
-    for (uint256 _b=1;_b<beneficiaries.length;_b++) {
-      uint256 amountDue = _balance.mul(disposition[beneficiaries[_b]] ).div(_dispositionSum).div(_unit);
-      beneficiaries[_b].transfer( amountDue );
-      emit BeneficiarySettled(beneficiaries[_b], amountDue);
+    if (beneficiaries.length > 1) {
+      for (uint256 _b=1;_b<beneficiaries.length;_b++) {
+        amountDue = _calcDispositionDue(beneficiaries[_b], _balance, _dispositionSum);
+        beneficiaries[_b].transfer( amountDue );
+        emit BeneficiarySettled(beneficiaries[_b], amountDue);
+      }
     }
     beneficiaries[0].transfer(address(this).balance);
+    disbursing = false;
   }
 
+  /**
+  * Scenarios:
+  * - Non-owner sends funds to contract: funds are received no function is triggerred
+  * - Owner sends funds to contract: funds are received and postpone is triggerred if not yet disbursed
+  * - Non-owner sends no value to contract: contract triggerDisposition if isDispositionDue
+  * - Owner sends no value to contract: postpone is triggerred if not yet disbursed
+  */
   function ()
     public payable
   {
-    if (msg.value == 0 && isDispositionDue()) {
-      triggerDisposition();
-    } else if (msg.sender == owner && disbursed == false) {
+    if (msg.sender == owner && disbursed == false) {
       postpone();
+    } else if (msg.value == 0 && isDispositionDue()) {
+      triggerDisposition();
     }
   }
 }
