@@ -7,7 +7,8 @@ const FormHelp = {
             'WillWallet': 'A willWallet combines both features of the Will and Wallet allowing transfer to any address by the Contract creator, as well as distribution to beneficiaries after specified WaitTime'
         },
         waitTime: 'WaitTime indicates how long after the last interaction with the smart contract, before the held tokens/coins can be distributed among the beneficiaries (Seconds)'
-    }
+    },
+    newBeneficiary: 'The ethereum address you want to add as a beneficiary for the Will'
 };
 
 export { FormHelp }; 

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
-import Beneficiaries from "./NetworkComponent";
+import Beneficiaries from "./Beneficiaries";
 import NetworkComponent from "./NetworkComponent";
 
 import { ContractTypes, Explorers } from '../../Config';
@@ -127,7 +127,9 @@ class Contract extends Component {
                     </Col>
                 </Row>
                 { this.contractHasBeneficiaries &&
-                    <Beneficiaries />
+                    <div>
+                        <Beneficiaries contractAddress={ this.state.contract.address } networkId={ this.props.networkId }/>
+                    </div>
                 }
             </Layout>
         )
