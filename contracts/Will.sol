@@ -158,6 +158,7 @@ contract Will is Ownable {
   function postpone ()
     public payable onlyOwner
   returns (bool) {
+    require(disbursed == false, 'Timer can not be reset after initial disposition');
     lastInteraction = now;
     return true;
   }

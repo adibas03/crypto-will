@@ -298,6 +298,17 @@ contract ('Will', function (accounts) {
 
   describe('postpone', function () {
     const valueToSend = 1 * ETHER;
+    it('should fail to postpone from non-priviledged address', async function () {
+      try {
+        await will.postpone({
+          from: accounts[2]
+        });
+        assert.fail(true, 'function should fail');
+      } catch (e) {
+        assert.exists(e.message || e, 'Expected error to exist from failed transaction');
+        assert.isFalse((e.message || e) === 'assert.fail()', 'Expected non-assert failure');
+      }
+    })
 
     it ('should successfully trigger postpone from owner address', async function () {
       const timeNow = Math.floor(new Date().getTime()/1000);
@@ -521,7 +532,8 @@ contract ('Will', function (accounts) {
 
       _remBeneficiaries.map((_bene, index) => {
         // console.log(Number(newAccountBalances[index]), Number(accountBalances[index]))
-        assert.isAtMost(Number(newAccountBalances[index]), Number(accountBalances[index]), 'Incorrect amounts disbursed');
+        assert.isAtLeast(Number(newAccountBalances[index]), Number(accountBalances[index])* 0.99, 'Incorrect amounts disbursed');
+        // assert.isAtMost(Number(newAccountBalances[index]), Number(accountBalances[index]), 'Incorrect amounts disbursed');
       });
     });
   });
