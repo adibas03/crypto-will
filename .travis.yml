@@ -9,6 +9,6 @@ cache:
     - node_modules
 install: npm install
 script:
-  - npm i truffle ganache-core 
+  - npm i truffle ganache-cli 
   - ganache-cli -i 1002 -l 8000000 > /dev/null & 
   - truffle test 
