@@ -42,13 +42,24 @@ contract ('Will', function (accounts) {
     }
   }
 
-  const contractBalance = function () {
+  const getBalance = function (address) {
     return new Promise ((resolve,reject) => {
-      web3.eth.getBalance(will.address, (err, res) => {
+      web3.eth.getBalance(address, (err, res) => {
         if (err) {
           reject(err);
         }
         resolve(res);
+      });
+    });
+  }
+
+  const getTxBlock = function (hash) {
+    return new Promise( (resolve, reject) => {
+      web3.eth.getBlock(hash, (err,res) => {
+        if (err) {
+          reject(err);
+        }
+        resolve (res);
       });
     });
   }
@@ -331,14 +342,7 @@ contract ('Will', function (accounts) {
         from: owner
       });
 
-      const txBlock = await new Promise( (resolve, reject) => {
-        web3.eth.getBlock(postponeReceipt.receipt.blockHash, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const txBlock = await getTxBlock(postponeReceipt.receipt.blockHash);
 
       const lastInteraction = await will.lastInteraction.call();
       assert.strictEqual(lastInteraction.toNumber(), txBlock.timestamp, 'Invalid lastInteraction time set in contract from block');
@@ -351,27 +355,20 @@ contract ('Will', function (accounts) {
       const isDisbursed = await will.disbursed.call();
       assert.isFalse(isDisbursed, 'Contract already disposed at least once');
 
-      const ethBalance = await contractBalance();
+      const ethBalance = await getBalance(will.address);
 
       const postponeReceipt = await will.postpone({
         from: owner,
         value: valueToSend
       });
 
-      const txBlock = await new Promise( (resolve, reject) => {
-        web3.eth.getBlock(postponeReceipt.receipt.blockHash, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const txBlock = await getTxBlock(postponeReceipt.receipt.blockHash);
 
       const lastInteraction = await will.lastInteraction.call();
       assert.strictEqual(lastInteraction.toNumber(), txBlock.timestamp, 'Invalid lastInteraction time set in contract from block');
       assert.isAtLeast(lastInteraction.toNumber(), timeNow, 'Invalid lastInteraction time set in contract from miner time');
 
-      const newEthBalance = await contractBalance();
+      const newEthBalance = await getBalance(will.address);
       assert.strictEqual(newEthBalance.minus(ethBalance).toNumber(), valueToSend, 'Wrong amount of Ether sent to the contract');
     });
   });
@@ -392,14 +389,7 @@ contract ('Will', function (accounts) {
         value: 0
       });
 
-      const txBlock = await new Promise( (resolve, reject) => {
-        web3.eth.getBlock(postponeReceipt.receipt.blockHash, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const txBlock = await getTxBlock(postponeReceipt.receipt.blockHash);
 
       const lastInteraction = await will.lastInteraction.call();
       assert.strictEqual(lastInteraction.toNumber(), txBlock.timestamp, 'Invalid lastInteraction time set in contract from block');
@@ -412,27 +402,20 @@ contract ('Will', function (accounts) {
       const isDisbursed = await will.disbursed.call();
       assert.isFalse(isDisbursed, 'Contract already disposed at least once');
 
-      const ethBalance = await contractBalance()
+      const ethBalance = await getBalance(will.address)
 
       const postponeReceipt = await will.sendTransaction({
         from: owner,
         value: valueToSend
       });
 
-      const txBlock = await new Promise( (resolve, reject) => {
-        web3.eth.getBlock(postponeReceipt.receipt.blockHash, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const txBlock = await getTxBlock(postponeReceipt.receipt.blockHash);
 
       const lastInteraction = await will.lastInteraction.call();
       assert.strictEqual(lastInteraction.toNumber(), txBlock.timestamp, 'Invalid lastInteraction time set in contract from block');
       assert.isAtLeast(lastInteraction.toNumber(), timeNow, 'Invalid lastInteraction time set in contract from miner time');
 
-      const newEthBalance = await contractBalance();
+      const newEthBalance = await getBalance(will.address);
       assert.strictEqual(newEthBalance.minus(ethBalance).toNumber(), valueToSend, 'Wrong amount of Ether sent to the contract');
     });
 
@@ -462,16 +445,11 @@ contract ('Will', function (accounts) {
       const isDisbursed = await will.disbursed.call();
       assert.isFalse(isDisbursed, 'Contract already disposed at least once');
 
-      const accountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise ((resolve,reject) => {
+      const accountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise (async (resolve,reject) => {
         if (_bene === NULL_ADDRESS) {
           resolve(0);
         }
-        web3.eth.getBalance(_bene, (err, res) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(res);
-        });
+        resolve(await getBalance(_bene));
       })));
 
       await forceMine(waitTime);
@@ -479,7 +457,7 @@ contract ('Will', function (accounts) {
       const newIsDispositionDue = await will.isDispositionDue.call();
       assert.isTrue(newIsDispositionDue, 'Disposition is not due');
 
-      const willContractBalance = await contractBalance();
+      const willContractBalance = await getBalance(will.address);
 
       await will.sendTransaction({
         from: accounts[3]
@@ -488,16 +466,11 @@ contract ('Will', function (accounts) {
       const disbursed = await will.disbursed.call();
       assert.isTrue(disbursed, 'Expected contract to disburse');
 
-      const newAccountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise ((resolve,reject) => {
+      const newAccountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise (async (resolve,reject) => {
         if (_bene === NULL_ADDRESS) {
           resolve(0);
         }
-        web3.eth.getBalance(_bene, (err, res) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(res);
-        });
+        resolve(await getBalance(_bene));
       })));
 
       const dispositionSum = _remDisposition.reduce((a,b) => a+b);
@@ -535,14 +508,14 @@ contract ('Will', function (accounts) {
       const isDisbursed = await will.disbursed.call();
       assert.isTrue(isDisbursed, 'Contract not yet disposed at least once');
 
-      const willContractBalance = await contractBalance();
+      const willContractBalance = await getBalance(will.address);
 
       await will.sendTransaction({
         from: accounts[6],
         value: fundAmount
       });
 
-      const newWillContractBalance = await contractBalance();
+      const newWillContractBalance = await getBalance(will.address);
       assert.deepEqual(newWillContractBalance, willContractBalance.plus(fundAmount), 'Contract not successfully funded post-initial disbursement');
     });
 
@@ -554,34 +527,24 @@ contract ('Will', function (accounts) {
       const isDisbursed = await will.disbursed.call();
       assert.isTrue(isDisbursed, 'Contract not yet disposed at least once');
 
-      const accountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise ((resolve,reject) => {
+      const accountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise (async (resolve,reject) => {
         if (_bene === NULL_ADDRESS) {
           resolve(0);
         }
-        web3.eth.getBalance(_bene, (err, res) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(res);
-        });
+        resolve(await getBalance(_bene));
       })));
 
-      const willContractBalance = await contractBalance();
+      const willContractBalance = await getBalance(will.address);
 
       await will.sendTransaction({
         from: accounts[1]
       });
 
-      const newAccountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise ((resolve,reject) => {
+      const newAccountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise (async (resolve,reject) => {
         if (_bene === NULL_ADDRESS) {
           resolve(0);
         }
-        web3.eth.getBalance(_bene, (err, res) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(res);
-        });
+        resolve( await getBalance(_bene));
       })));
 
       const dispositionSum = _remDisposition.reduce((a,b) => a+b);
