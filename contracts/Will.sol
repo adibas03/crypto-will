@@ -10,7 +10,6 @@ contract Will is Ownable {
   using SafeMath for uint;
 
   uint256 constant ONE = 1; //Constant representation of 1
-  uint256 constant public decimals = 8; //Allow fractions for disposition
   uint256 constant public maxArrayLength = 10; //Maximum length of array for functions that accept arrays
 
   bool public disbursed; //Whether the contract has Disposed at least once
@@ -31,12 +30,6 @@ contract Will is Ownable {
     beneficiaries.push(msg.sender);
     waitingTime = _waitTime;
     lastInteraction = now;
-  }
-
-  function unit ()
-    public pure
-  returns (uint256) {
-    return 10**decimals;
   }
 
   function totalBeneficiaries ()
@@ -68,7 +61,7 @@ contract Will is Ownable {
   function _calcDispositionDue (address _beneficiary, uint256 _totalBalance, uint256 _dispositionSum)
     internal view
   returns (uint256){
-    return (_totalBalance.mul(disposition[_beneficiary] )).div(_dispositionSum).div(unit());
+    return (_totalBalance.mul(disposition[_beneficiary] )).div(_dispositionSum);
   }
 
   function _addBeneficiary (address _beneficiary, uint256 _disposition)

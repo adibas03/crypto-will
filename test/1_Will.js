@@ -1,7 +1,6 @@
 const Will = artifacts.require('./Will');
 
 contract ('Will', function (accounts) {
-  const UNIT = 10**8;
   const ETHER = 10**18;
   const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -47,15 +46,15 @@ contract ('Will', function (accounts) {
   let will;
 
   const beneficiaries = [
-    [ accounts[1], 150 * UNIT ],
-    [ accounts[2], 100 * UNIT ],
+    [ accounts[1], 150 ],
+    [ accounts[2], 100 ],
     [ NULL_ADDRESS, 0 ],
-    [ accounts[3], 50 * UNIT ],
-    [ accounts[4], 70 * UNIT ],
+    [ accounts[3], 50 ],
+    [ accounts[4], 70 ],
     [ NULL_ADDRESS, 0 ],
-    [ accounts[5], 150 * UNIT ],
+    [ accounts[5], 150 ],
     [ NULL_ADDRESS, 0 ],
-    [ accounts[6], 30 * UNIT ],
+    [ accounts[6], 30 ],
   ];
 
   before(async function () {
@@ -526,14 +525,12 @@ contract ('Will', function (accounts) {
       const dispositionSum = _remDisposition.reduce((a,b) => a+b);
       _remDisposition.map((_disposition, index) => {
         const gross = Math.floor(contractBalance.times(_disposition).toNumber());
-        const amountDue = Math.floor(gross/dispositionSum/(UNIT));
+        const amountDue = Math.floor(gross/dispositionSum);
         accountBalances[index] = accountBalances[index] === 0 ? amountDue : accountBalances[index].plus(amountDue);
       });
 
       _remBeneficiaries.map((_bene, index) => {
-        // console.log(Number(newAccountBalances[index]), Number(accountBalances[index]))
         assert.isAtLeast(Number(newAccountBalances[index]), Number(accountBalances[index])* 0.99, 'Incorrect amounts disbursed');
-        // assert.isAtMost(Number(newAccountBalances[index]), Number(accountBalances[index]), 'Incorrect amounts disbursed');
       });
     });
   });
