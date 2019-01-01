@@ -3,6 +3,7 @@ const Will = artifacts.require('./Will');
 contract ('Will', function (accounts) {
   const ETHER = 10**18;
   const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
+  const CALC_ACCURACY = 0.9999;
 
   const forceMine = async (value, isBlock) => {
   	//value: number of seconds or blocks to advance by
@@ -41,6 +42,17 @@ contract ('Will', function (accounts) {
     }
   }
 
+  const contractBalance = function () {
+    return new Promise ((resolve,reject) => {
+      web3.eth.getBalance(will.address, (err, res) => {
+        if (err) {
+          reject(err);
+        }
+        resolve(res);
+      });
+    });
+  }
+
   const owner = accounts[0];
   const waitTime = 86400;
   let will;
@@ -61,6 +73,7 @@ contract ('Will', function (accounts) {
     will = await Will.new(waitTime);
     assert.exists(will.address, ' Failed to deploy Will with address');
   });
+
 
   describe('updateBeneficiary', function () {
     const _beneficiary = beneficiaries[0][0];
@@ -338,14 +351,7 @@ contract ('Will', function (accounts) {
       const isDisbursed = await will.disbursed.call();
       assert.isFalse(isDisbursed, 'Contract already disposed at least once');
 
-      const ethBalance = await new Promise( (resolve, reject) => {
-        web3.eth.getBalance(will.address, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const ethBalance = await contractBalance();
 
       const postponeReceipt = await will.postpone({
         from: owner,
@@ -365,14 +371,7 @@ contract ('Will', function (accounts) {
       assert.strictEqual(lastInteraction.toNumber(), txBlock.timestamp, 'Invalid lastInteraction time set in contract from block');
       assert.isAtLeast(lastInteraction.toNumber(), timeNow, 'Invalid lastInteraction time set in contract from miner time');
 
-      const newEthBalance = await new Promise( (resolve, reject) => {
-        web3.eth.getBalance(will.address, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const newEthBalance = await contractBalance();
       assert.strictEqual(newEthBalance.minus(ethBalance).toNumber(), valueToSend, 'Wrong amount of Ether sent to the contract');
     });
   });
@@ -413,14 +412,7 @@ contract ('Will', function (accounts) {
       const isDisbursed = await will.disbursed.call();
       assert.isFalse(isDisbursed, 'Contract already disposed at least once');
 
-      const ethBalance = await new Promise( (resolve, reject) => {
-        web3.eth.getBalance(will.address, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const ethBalance = await contractBalance()
 
       const postponeReceipt = await will.sendTransaction({
         from: owner,
@@ -440,14 +432,7 @@ contract ('Will', function (accounts) {
       assert.strictEqual(lastInteraction.toNumber(), txBlock.timestamp, 'Invalid lastInteraction time set in contract from block');
       assert.isAtLeast(lastInteraction.toNumber(), timeNow, 'Invalid lastInteraction time set in contract from miner time');
 
-      const newEthBalance = await new Promise( (resolve, reject) => {
-        web3.eth.getBalance(will.address, (err,res) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve (res);
-        });
-      });
+      const newEthBalance = await contractBalance();
       assert.strictEqual(newEthBalance.minus(ethBalance).toNumber(), valueToSend, 'Wrong amount of Ether sent to the contract');
     });
 
@@ -494,14 +479,7 @@ contract ('Will', function (accounts) {
       const newIsDispositionDue = await will.isDispositionDue.call();
       assert.isTrue(newIsDispositionDue, 'Disposition is not due');
 
-      const contractBalance = await new Promise ((resolve,reject) => {
-        web3.eth.getBalance(will.address, (err, res) => {
-          if (err) {
-            reject(err);
-          }
-          resolve(res);
-        });
-      });
+      const willContractBalance = await contractBalance();
 
       await will.sendTransaction({
         from: accounts[3]
@@ -524,13 +502,98 @@ contract ('Will', function (accounts) {
 
       const dispositionSum = _remDisposition.reduce((a,b) => a+b);
       _remDisposition.map((_disposition, index) => {
-        const gross = Math.floor(contractBalance.times(_disposition).toNumber());
-        const amountDue = Math.floor(gross/dispositionSum);
+        const gross = willContractBalance.times(_disposition);
+        const amountDue = Math.floor(gross.div(dispositionSum).toNumber());
         accountBalances[index] = accountBalances[index] === 0 ? amountDue : accountBalances[index].plus(amountDue);
       });
 
       _remBeneficiaries.map((_bene, index) => {
-        assert.isAtLeast(Number(newAccountBalances[index]), Number(accountBalances[index])* 0.99, 'Incorrect amounts disbursed');
+        assert.isAtLeast(Number(newAccountBalances[index]), Number(accountBalances[index])* CALC_ACCURACY, 'Incorrect amounts disbursed');
+      });
+    });
+  });
+
+  describe('triggerDisposition', function (){
+    const fundAmount = 1 * ETHER;
+    const _remBeneficiaries = beneficiaries.slice(0, 4).map(bene => bene[0]);
+    const _remDisposition = beneficiaries.slice(0, 4).map(bene => bene[1]);
+
+    it ('should fail to trigger postpone after initial Disbursement', async function () {
+      const isDisbursed = await will.disbursed.call();
+      assert.isTrue(isDisbursed, 'Contract not yet disposed at least once');
+
+      try {
+        await will.postpone({
+          from: owner
+        });
+      } catch (e) {
+        assert.exists(e.message || e, 'Transaction should fail with an error');
+      }
+    });
+
+    it ('should successfully fund contract after initial Disbursement', async function () {
+      const isDisbursed = await will.disbursed.call();
+      assert.isTrue(isDisbursed, 'Contract not yet disposed at least once');
+
+      const willContractBalance = await contractBalance();
+
+      await will.sendTransaction({
+        from: accounts[6],
+        value: fundAmount
+      });
+
+      const newWillContractBalance = await contractBalance();
+      assert.deepEqual(newWillContractBalance, willContractBalance.plus(fundAmount), 'Contract not successfully funded post-initial disbursement');
+    });
+
+    it('should successfully triggerDisposition() after initial disbursement', async function () {
+
+      const isDispositionDue = await will.isDispositionDue.call();
+      assert.isTrue(isDispositionDue, 'Disposition is not due');
+
+      const isDisbursed = await will.disbursed.call();
+      assert.isTrue(isDisbursed, 'Contract not yet disposed at least once');
+
+      const accountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise ((resolve,reject) => {
+        if (_bene === NULL_ADDRESS) {
+          resolve(0);
+        }
+        web3.eth.getBalance(_bene, (err, res) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(res);
+        });
+      })));
+
+      const willContractBalance = await contractBalance();
+
+      await will.sendTransaction({
+        from: accounts[1]
+      });
+
+      const newAccountBalances = await Promise.all(_remBeneficiaries.map( _bene => new Promise ((resolve,reject) => {
+        if (_bene === NULL_ADDRESS) {
+          resolve(0);
+        }
+        web3.eth.getBalance(_bene, (err, res) => {
+          if (err) {
+            reject(err);
+          }
+          resolve(res);
+        });
+      })));
+
+      const dispositionSum = _remDisposition.reduce((a,b) => a+b);
+
+      _remDisposition.map((_disposition, index) => {
+        const gross = willContractBalance.times(_disposition);
+        const amountDue = Math.floor(gross.div(dispositionSum).toNumber());
+        accountBalances[index] = accountBalances[index] === 0 ? amountDue : accountBalances[index].plus(String(amountDue));
+      });
+
+      _remBeneficiaries.map((_bene, index) => {
+        assert.isAtLeast(Number(newAccountBalances[index]), Number(accountBalances[index])* CALC_ACCURACY, 'Incorrect amounts disbursed');
       });
     });
   });

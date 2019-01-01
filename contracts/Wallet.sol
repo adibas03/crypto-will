@@ -11,8 +11,7 @@ contract Wallet is Ownable {
 
   constructor ()
     public
-  {
-  }
+  {}
 
   function transfer (address _destination, uint256 _value)
     public onlyOwner
