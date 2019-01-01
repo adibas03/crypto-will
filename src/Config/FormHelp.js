@@ -8,7 +8,10 @@ const FormHelp = {
         },
         waitTime: 'WaitTime indicates how long after the last interaction with the smart contract, before the held tokens/coins can be distributed among the beneficiaries. Months are calculated as 30 days, and years as 365 days'
     },
-    newBeneficiary: 'The ethereum address you want to add as a beneficiary for the Will'
+    newBeneficiary: 'The ethereum address you want to add as a beneficiary for the Will',
+    newBeneficiaryDisposition: 'The desired portion to allocate to the address',
+    newBeneficiaryDispositionPercentage: 'The desired percentage of the Will to allocate to the address',
+    newBeneficiaryDispositionValue: 'The actual value based on the present contract balance'
 };
 
 export { FormHelp }; 

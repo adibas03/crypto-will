@@ -98,6 +98,7 @@ class ContractsList extends Component {
             this.setState({ fetchingContracts: false });
         } catch (e) {
             notification['error']({
+                duration: 0,
                 message: 'Contract List failed to load',
                 description: e.message || e
             });

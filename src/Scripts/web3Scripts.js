@@ -1,10 +1,21 @@
 import { Networks } from '../Config';
+const ETHER = 10**18;
 
 const web3Scripts = {
     async getNetworkId (web3) {
         const getID = web3.version.getNetwork || web3.eth.net.getId;
         return new Promise((resolve, reject) => {
             getID(function(err, res) {
+                if (err) {
+                    reject(err);
+                }
+                resolve(res);
+            })
+        })
+    },
+    async getAddressBalance (address) {
+        return new Promise((resolve, reject) => {
+            web3.eth.getBalance(address, function(err, res) {
                 if (err) {
                     reject(err);
                 }
@@ -95,6 +106,14 @@ const web3Scripts = {
     // },
     async unsubscribeEvent (event) {
         return await event.unsubscribe();
+    },
+    parseEtherValue (number = 0, inbound) {
+        number = number.toNumber ? number.toNumber() : Number(number);
+        if (inbound) {
+            return number/ETHER;
+        } else {
+            return number * ETHER;
+        }
     },
     truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {
         const subObject = { fromBlock, filter };

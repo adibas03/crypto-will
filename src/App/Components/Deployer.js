@@ -80,6 +80,7 @@ class Deployer extends Component {
             }),
         })
         .catch((err) => notification['error']({
+            duration: 0,
             message: 'Deployment failed',
             description: err.message || err
         }))
