@@ -9,8 +9,6 @@ import { DrizzleProvider } from "drizzle-react";
 
 // Import contract
 import Deployer from "../build/contracts/Deployer.json";
-import TutorialToken from "../build/contracts/TutorialToken.json";
-// import WillWallet from "../build/contracts/WillWallet.json";
 
 const options = {
   web3: {
@@ -22,8 +20,6 @@ const options = {
   },
   contracts: [
     Deployer,
-    TutorialToken,
-    // WillWallet
   ],
   // events: {},
   polls: {
