@@ -38,7 +38,7 @@ contract ('Wallet', function (accounts) {
 
     it('should fail to transfer from non-priviledged address', async function () {
         try {
-          await wallet.transfer(accounts[1], transferValue, {
+          await wallet.transfer(accounts[1], String(transferValue), {
             from: accounts[3]
           });
           assert.fail(true, 'Expected funtion to fail');
@@ -63,7 +63,7 @@ contract ('Wallet', function (accounts) {
     it('should successfully transfer funds', async function () {
       const acctBalance = await getBalance(accounts[1]);
 
-      await wallet.transfer(accounts[1], transferValue, {
+      await wallet.transfer(accounts[1], String(transferValue), {
         from: owner
       });
 
@@ -74,11 +74,17 @@ contract ('Wallet', function (accounts) {
 
   describe('callFunction()', function () {
     let tutorialToken;
+    const tokenNumber = 15 * 10 ** 8;
 
     before(async function () {
       tutorialToken = await TutorialToken.new({
         from: owner
       });
+      await tutorialToken.mint(wallet.address, tokenNumber, {
+        from: owner
+      });
+      const balance = await tutorialToken.balanceOf.call(wallet.address);
+      assert.equal(balance.toNumber(), tokenNumber, 'Incorrect quantity of tokens minted');
     });
 
     it('should fail to callFunction from non-priviledged account', function () {

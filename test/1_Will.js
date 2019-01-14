@@ -1,4 +1,5 @@
 const Will = artifacts.require('./Will');
+const BigNumber = require('bignumber.js');
 
 contract ('Will', function (accounts) {
   const ETHER = 10**18;
@@ -8,9 +9,10 @@ contract ('Will', function (accounts) {
   const forceMine = async (value, isBlock) => {
   	//value: number of seconds or blocks to advance by
   	let count = 1;
+    const send = web3.currentProvider.sendAsync || web3.currentProvider.send;
   	if (!isBlock) {
   		 await new Promise((resolve, reject) => {
-         web3.currentProvider.sendAsync({
+         send({
     		   jsonrpc: "2.0",
     		   method: "evm_increaseTime",
     		   params: [value],
@@ -28,7 +30,7 @@ contract ('Will', function (accounts) {
 
     for( let i=0;i<count;i++) {
      await new Promise((resolve, reject) => {
-       web3.currentProvider.sendAsync({
+       send({
     	   jsonrpc: "2.0",
     	   method: "evm_mine",
     	   id: new Date().getTime()
@@ -48,7 +50,7 @@ contract ('Will', function (accounts) {
         if (err) {
           reject(err);
         }
-        resolve(res);
+        resolve(new BigNumber(res));
       });
     });
   }
