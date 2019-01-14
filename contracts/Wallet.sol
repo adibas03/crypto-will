@@ -20,7 +20,7 @@ contract Wallet is Ownable {
     return true;
   }
 
-  function callFunction (address _address, uint256 _value, bytes32 _callData) //Can be used to make wallet type calls, to interact with smart contracts
+  function callFunction (address _address, uint256 _value, bytes _callData) //Can be used to make wallet type calls, to interact with smart contracts
     public payable onlyOwner
   returns (bool) {
     return _address.call.value(_value)(_callData);

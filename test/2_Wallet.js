@@ -1,5 +1,6 @@
 const Wallet = artifacts.require('./Wallet');
 const TutorialToken = artifacts.require('./TutorialToken');
+const BigNumber = require('bignumber.js');
 
 contract ('Wallet', function (accounts) {
   const ETHER = 10**18;
@@ -13,7 +14,7 @@ contract ('Wallet', function (accounts) {
         if (err) {
           reject(err);
         }
-        resolve(res);
+        resolve(new BigNumber(res));
       });
     });
   }
@@ -50,7 +51,7 @@ contract ('Wallet', function (accounts) {
 
     it('should fail to transfer negative value', async function () {
         try {
-          await wallet.transfer(accounts[1], -1, {
+          await wallet.transfer(accounts[1], "-1", {
             from: owner
           });
           assert.fail(true, 'Expected funtion to fail');
@@ -74,21 +75,41 @@ contract ('Wallet', function (accounts) {
 
   describe('callFunction()', function () {
     let tutorialToken;
-    const tokenNumber = 15 * 10 ** 8;
+    const tokenAmount = 15 * 10 ** 8;
+    let calldata;
 
     before(async function () {
       tutorialToken = await TutorialToken.new({
         from: owner
       });
-      await tutorialToken.mint(wallet.address, tokenNumber, {
+      await tutorialToken.mint(wallet.address, tokenAmount, {
         from: owner
       });
       const balance = await tutorialToken.balanceOf.call(wallet.address);
-      assert.equal(balance.toNumber(), tokenNumber, 'Incorrect quantity of tokens minted');
+      assert.equal(balance.toNumber(), tokenAmount, 'Incorrect quantity of tokens minted');
+      calldata = tutorialToken.contract.methods.transfer(accounts[3], String(tokenAmount)).encodeABI();
     });
 
-    it('should fail to callFunction from non-priviledged account', function () {
+    it('should fail to callFunction from non-priviledged account', async function () {
+      try{
+        await wallet.callFunction( tutorialToken.address, 0, calldata, {
+          from: accounts[5]
+        });
+        assert.fail(true, 'Expected funtion to fail');
+      } catch (e) {
+        assert.exists(e, 'Expected transaction to fail with error');
+        assert.isFalse((e.message || e) === 'assert.fail()', 'Expected non-assert failure');
+      }
     });
 
+    it('should successfully callFunction from priviledged account', async function () {
+      const balance = new BigNumber(await tutorialToken.balanceOf.call(accounts[3]).toString());
+      await wallet.callFunction( tutorialToken.address, 0, calldata, {
+        from: owner
+      });
+
+      const newBalance = new BigNumber(await tutorialToken.balanceOf.call(accounts[3]).toString());
+      assert.deepEqual(newBalance, balance.plus(tokenAmount), 'Incorect amount of tokens transferred');
+    });
   });
 });
