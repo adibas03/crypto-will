@@ -1,6 +1,8 @@
 import React from "react";
 import ReactDOM from "react-dom";
 // import "./index.css";
+
+import './Style';
 import App from "./App";
 // import registerServiceWorker from "./registerServiceWorker";
 import { DrizzleProvider } from "drizzle-react";
@@ -23,7 +25,11 @@ const options = {
     TutorialToken,
     // WillWallet
   ],
-  // events: {}
+  // events: {},
+  polls: {
+    accounts: 100,
+    blocks: 10000
+  }
 };
 
 const root = document.createElement("div");
@@ -36,4 +42,3 @@ ReactDOM.render(
   </DrizzleProvider>,
   document.getElementById("root")
 );
-// registerServiceWorker();

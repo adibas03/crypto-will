@@ -1,10 +1,8 @@
-// require('babel-polyfill');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const settings = {
     entry: [
-        // 'babel-polyfill',
         './src/index.js'
     ],
     output: {
