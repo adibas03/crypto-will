@@ -16,7 +16,7 @@ module.exports = {
       include: path.resolve(__dirname, 'src'),
       loader: 'babel-loader',
       options: {
-        presets: ['react'],
+        presets: ['@babel/preset-react'],
         plugins: [require('babel-plugin-transform-class-properties'), require('babel-plugin-transform-object-rest-spread')]
       }
     }]
@@ -30,7 +30,7 @@ module.exports = {
     'drizzle',
     'drizzle-react',
     'prop-types',
-    'react',
+    '@babel/preset-react',
     'redux'
   ]
 };
