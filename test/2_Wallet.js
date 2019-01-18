@@ -21,6 +21,7 @@ contract ('Wallet', function (accounts) {
 
   before(async function () {
     wallet = await Wallet.new();
+    console.log('Wallet version:', (await wallet.version.call()).toString());
     assert.exists(wallet.address, ' Failed to deploy Wallet with address');
   });
 

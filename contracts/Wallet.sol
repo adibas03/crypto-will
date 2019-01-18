@@ -8,6 +8,7 @@ import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol
 * The owner of the contract can be set as an Identity contract like EIP 725 and increse the possibilities
 */
 contract Wallet is Ownable {
+  uint256 constant public version = 0;
 
   constructor ()
     public

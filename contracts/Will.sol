@@ -8,6 +8,7 @@ import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol
 */
 contract Will is Ownable {
   using SafeMath for uint;
+  uint256 constant public version = 0;
 
   uint256 constant ONE = 1; //Constant representation of 1
   uint256 constant public maxArrayLength = 10; //Maximum length of array for functions that accept arrays
