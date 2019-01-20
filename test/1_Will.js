@@ -86,6 +86,7 @@ contract ('Will', function (accounts) {
     will = await Will.new(waitTime);
     console.log('Will version:', (await will.version.call()).toString());
     assert.exists(will.address, ' Failed to deploy Will with address');
+    assert.equal(await will.waitingTime.call(), waitTime, 'Incorrect waitTime set in contract');
   });
 
 

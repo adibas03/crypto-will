@@ -15,7 +15,7 @@ contract Will is Ownable {
 
   bool public disbursed; //Whether the contract has Disposed at least once
   bool public disbursing; //Whether the contract is pressently running a disbursement
-  uint256 waitingTime; //How long to wait before initiating distribution
+  uint256 public waitingTime; //How long to wait before initiating distribution
   uint256 public lastInteraction; //Last time contract was interacted with
   address[] public beneficiaries; //Address for each beneficiary
   mapping( address => uint256) public disposition; //List of ratio of contract balance to sent to each beneficiary
