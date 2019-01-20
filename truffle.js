@@ -23,12 +23,12 @@ module.exports = {
       port: 8545   // Different than the default below
     },
     kovan: {
-      network_id: 41,
+      network_id: 42,
       provider: function() {
         const HDWalletProvider = require('truffle-hdwallet-provider');
         return new HDWalletProvider(MNEMONIC, 'https://kovan.infura.io')
       },
-      gasPrice: 10000000000,
+      gasPrice: 2000000000,
     },
     rinkeby: {
       network_id: 4,
@@ -36,7 +36,7 @@ module.exports = {
         const HDWalletProvider = require('truffle-hdwallet-provider');
         return new HDWalletProvider(MNEMONIC, 'https://rinkeby.infura.io')
       },
-      gasPrice: 10000000000,
+      gasPrice: 2000000000,
     },
     ropsten: {
       network_id: 3,
@@ -44,7 +44,7 @@ module.exports = {
         const HDWalletProvider = require('truffle-hdwallet-provider');
         return new HDWalletProvider(MNEMONIC, 'https://ropsten.infura.io')
       },
-      gasPrice: 10000000000,
+      gasPrice: 2000000000,
     },
     test: {
       network_id: 1002,
