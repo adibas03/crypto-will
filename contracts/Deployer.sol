@@ -4,6 +4,8 @@ import "../installed_contracts/zeppelin-solidity/contracts/lifecycle/Pausable.so
 import "./WillWallet.sol";
 
 contract Deployer is Pausable {
+  uint256 constant public version = 0;
+
   constructor ()
   public {
 
