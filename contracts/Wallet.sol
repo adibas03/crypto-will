@@ -8,11 +8,11 @@ import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol
 * The owner of the contract can be set as an Identity contract like EIP 725 and increse the possibilities
 */
 contract Wallet is Ownable {
+  uint256 constant public version = 0;
 
   constructor ()
     public
-  {
-  }
+  {}
 
   function transfer (address _destination, uint256 _value)
     public onlyOwner
@@ -21,7 +21,7 @@ contract Wallet is Ownable {
     return true;
   }
 
-  function callFunction (address _address, uint256 _value, bytes32 _callData) //Can be used to make wallet type calls, to interact with smart contracts
+  function callFunction (address _address, uint256 _value, bytes _callData) //Can be used to make wallet type calls, to interact with smart contracts
     public payable onlyOwner
   returns (bool) {
     return _address.call.value(_value)(_callData);
