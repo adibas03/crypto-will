@@ -104,12 +104,12 @@ contract ('Wallet', function (accounts) {
     });
 
     it('should successfully callFunction from priviledged account', async function () {
-      const balance = new BigNumber(await tutorialToken.balanceOf.call(accounts[3]).toString());
+      const balance = new BigNumber((await tutorialToken.balanceOf.call(accounts[3])).toString());
       await wallet.callFunction( tutorialToken.address, 0, calldata, {
         from: owner
       });
 
-      const newBalance = new BigNumber(await tutorialToken.balanceOf.call(accounts[3]).toString());
+      const newBalance = new BigNumber((await tutorialToken.balanceOf.call(accounts[3])).toString());
       assert.deepEqual(newBalance, balance.plus(tokenAmount), 'Incorect amount of tokens transferred');
     });
   });
