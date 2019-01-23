@@ -12,15 +12,15 @@ You can:
 
 #### Ropsten
 ```
-  Deployer: 0xb42dA29a59a6042dD236009fc4A0e43B50C9Cc1b
+  Deployer: 0x4db41D4330FDE79b04e102C11B13F419Cbd23C9f
 ```
 #### Rinkeby
 ```
-  Deployer: 0xD6dB47543BE46821446Fe7E5E206BCc1e7A83244
+  Deployer: 0xeeB34E4185fa2fa08c249FF1b859De1F677a74D1
 ```
 #### Kovan  
 ```
-  Deployer: 0x16E4255284FA3ebaec44CeB80F1D492a60cafcD1
+  Deployer: 0x4A7D8b802A60eB0D6d87c356529E89eEd3d838e6
 ```
 
 ## Tests

@@ -137,7 +137,7 @@ contract ('Will', function (accounts) {
     });
 
     it('should successfully updateBeneficiary', async function () {
-      const beneficiaryExists = await will.beneficiaryExists.call(_beneficiary);
+      const beneficiaryExists = await will.isBeneficiary.call(_beneficiary);
       assert.isFalse(beneficiaryExists, 'Address already set as beneficiary');
 
       await will.updateBeneficiary(
@@ -146,7 +146,7 @@ contract ('Will', function (accounts) {
         }
       );
 
-      const newBeneficiaryExists = await will.beneficiaryExists.call(_beneficiary);
+      const newBeneficiaryExists = await will.isBeneficiary.call(_beneficiary);
       assert.isTrue(newBeneficiaryExists, 'Address not successfully set as beneficiary');
 
       const setDisposition = (await will.disposition.call(_beneficiary)).toNumber();
@@ -174,7 +174,7 @@ contract ('Will', function (accounts) {
 
     it('should successfully updateBeneficiaries', async function () {
       const beneficiaryExists = await Promise.all(_remBeneficiaries.map( async (_bene) => {
-        return await will.beneficiaryExists.call(_bene);
+        return await will.isBeneficiary.call(_bene);
       }));
       const expectedExists = [
         false,
@@ -205,7 +205,7 @@ contract ('Will', function (accounts) {
       });
 
       const newBeneficiaryExists = await Promise.all(_remBeneficiaries.map( async (_bene) => {
-        return await will.beneficiaryExists.call(_bene);
+        return await will.isBeneficiary.call(_bene);
       }));
       const expectedUpdatedExists = [
         true,
@@ -254,7 +254,7 @@ contract ('Will', function (accounts) {
     });
 
     it('should successfully removeBeneficiary', async function () {
-      const beneficiaryExists = await will.beneficiaryExists.call(_beneficiary);
+      const beneficiaryExists = await will.isBeneficiary.call(_beneficiary);
       assert.isTrue(beneficiaryExists, 'Address not yet set as beneficiary');
 
       await will.removeBeneficiary(
@@ -263,7 +263,7 @@ contract ('Will', function (accounts) {
         }
       );
 
-      const newBeneficiaryExists = await will.beneficiaryExists.call(_beneficiary);
+      const newBeneficiaryExists = await will.isBeneficiary.call(_beneficiary);
       assert.isFalse(newBeneficiaryExists, 'Address not successfully removed from beneficiary');
 
       const setDisposition = (await will.disposition.call(_beneficiary)).toNumber();
@@ -290,7 +290,7 @@ contract ('Will', function (accounts) {
 
     it('should successfully removeBeneficiaries', async function () {
       const beneficiaryExists = await Promise.all(_toRemoveBeneficiaries.map( async (_bene) => {
-        return await will.beneficiaryExists.call(_bene);
+        return await will.isBeneficiary.call(_bene);
       }));
       const expectedExists = [
         true,
@@ -311,7 +311,7 @@ contract ('Will', function (accounts) {
       });
 
       const newBeneficiaryExists = await Promise.all(_toRemoveBeneficiaries.map( async (_bene) => {
-        return await will.beneficiaryExists.call(_bene);
+        return await will.isBeneficiary.call(_bene);
       }));
       const expectedUpdatedExists = [
         false,
