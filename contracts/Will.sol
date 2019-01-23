@@ -17,9 +17,8 @@ contract Will is Ownable {
   bool public disbursing; //Whether the contract is pressently running a disbursement
   uint256 public waitingTime; //How long to wait before initiating distribution
   uint256 public lastInteraction; //Last time contract was interacted with
-  address[] public beneficiaries; //Address for each beneficiary
+  address[] beneficiaries; //Address for each beneficiary
   mapping( address => uint256) public disposition; //List of ratio of contract balance to sent to each beneficiary
-  mapping(address => bool) public beneficiaryExists; //Boolean to indicate that address exists as beneficiary
   mapping(address => uint256) beneficiaryIndex; //Mapping of beneficiary to index in beneficiaries list
 
   event BeneficiaryUpdated( address indexed beneficiary, uint256 disposition); //Notify of update to beneficiaries / disposition
@@ -31,6 +30,12 @@ contract Will is Ownable {
     beneficiaries.push(msg.sender);
     waitingTime = _waitTime;
     lastInteraction = now;
+  }
+
+  function isBeneficiary (address _addr)
+    public view
+  returns (bool) {
+    return disposition[_addr] > 0;
   }
 
   function totalBeneficiaries ()
@@ -70,8 +75,8 @@ contract Will is Ownable {
   returns (bool)
   {
     require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
-    require(beneficiaryExists[_beneficiary] == false, 'Cannot add existing beneficiary Anew, use update');
-    beneficiaryExists[_beneficiary] = true;
+    require(_disposition > 0, 'Disposition must be greter than 0');
+    require(isBeneficiary(_beneficiary) == false, 'Cannot add existing beneficiary Anew, use update');
     beneficiaryIndex[_beneficiary] = beneficiaries.length;
     disposition[_beneficiary] = _disposition;
     beneficiaries.push(_beneficiary);
@@ -123,7 +128,6 @@ contract Will is Ownable {
     //Remove beneficiary
     delete(disposition[_beneficiary]);
     delete(beneficiaryIndex[_beneficiary]);
-    delete(beneficiaryExists[_beneficiary]);
 
     // Rearrange indexes
     beneficiaries[idx] = beneficiaries[ beneficiaries.length.sub(ONE) ];
