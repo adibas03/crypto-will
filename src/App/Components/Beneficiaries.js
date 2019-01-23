@@ -4,7 +4,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 
 import { web3Scripts } from '../../Scripts';
-import { ContractTypes, FormHelp } from '../../Config';
+import { FormHelp } from '../../Config';
 
 import Button from 'antd/lib/button';
 import Card from 'antd/lib/card';
@@ -39,6 +39,7 @@ class Beneficiaries extends Component {
     }
 
     state = {
+        beneficiaries: [],
         newBeneficiary: '',
         newBeneficiaryDisposition: '',
         newBeneficiaryDispositionPercentage: '',
@@ -46,23 +47,46 @@ class Beneficiaries extends Component {
     }
 
     get newBeneficiaryCorrect () {
+        return this.props.isOwner;
+    }
+
+    async loadBeneficiaries () {
+        console.log(this.props);
+        this.setState({
+            beneficiaries: await web3Scripts.fetchBeneficiaries(this.props.drizzle, this.props.contractAddress)
+        })
+        // this.props.contractAddress;
+        
     }
 
     addBeneficiary () {
     }
 
-    loadBeneficiaries () {
-        // this.props.contractAddress;
+    getTotalRatio () {
+        // const total = this.state.beneficiaries;
     }
 
-    validateStatus (field) {
+    calcValue (amount) {
+        return this.contractAddress
     }
 
-    handleChange = (field) => (e) => {
-        this.setState({ [field]: typeof e === 'string' ? e : e.target.value });
+    updateArray (array, index, value) {
+        array[index] = value;
+        return array;
     }
 
-    async componentWillMOunt () {
+    validateStatus (field, index) {
+    }
+
+    handleChange = (field, index) => (e) => {
+        if (typeof index === 'undefined') {
+            this.setState({ [field]: typeof e === 'string' ? e : e.target.value });
+        } else {
+            this.setState({ [field]: typeof e === 'string' ? updateArray(this.state[field], index, e) : updateArray(this.state[field], index, e.target.value) });
+        }
+    }
+
+    async componentWillMount () {
         await this.loadBeneficiaries ();
     }
 
@@ -77,33 +101,26 @@ class Beneficiaries extends Component {
                 </Row>
                 <Form onSubmit={(e) => e.preventDefault()} >
                     <Row gutter={16}>
-                        <Col span={12}>
-                            <h4>
+                        <Col span={15}>
+                            <h5>
                                 <span title={FormHelp['newBeneficiary']} style={{ cursor: 'help' }}>
                                     Address
                                 </span>
-                            </h4>
+                            </h5>
                         </Col>
-                        <Col span={4}>
-                            <h4>
+                        <Col span={3}>
+                            <h5>
                                 <span title={FormHelp['newBeneficiaryDisposition']} style={{ cursor: 'help' }}>
                                     Ratio
                                 </span>
-                            </h4>
-                        </Col>
-                        <Col span={2}>
-                            <h4>
-                                <span title={FormHelp['newBeneficiaryDispositionPercentage']} style={{ cursor: 'help' }}>
-                                    %
-                                </span>
-                            </h4>
+                            </h5>
                         </Col>
                         <Col span={4}>
-                            <h4>
+                            <h5>
                                 <span title={FormHelp['newBeneficiaryDispositionValue']} style={{ cursor: 'help' }}>
-                                    Value
+                                    Value (Eth)
                                 </span>
-                            </h4>
+                            </h5>
                         </Col>
                         <Col span={2}>
                         </Col>
@@ -112,33 +129,47 @@ class Beneficiaries extends Component {
                         </Col>
                     </Row>
                     {
-                        // this.
+                        this.state.beneficiaries.map( (beneficiary, index) => 
+                            <Row gutter={16}>
+                                <Col span={15}>
+                                    <Item hasFeedback={true} validateStatus={this.validateStatus('beneficiary', index)} required>
+                                        <Input onChange={this.handleChange('beneficiary', index)} value={this.state.beneficiary[index]} />
+                                    </Item>
+                                </Col>
+                                <Col span={3}>
+                                    <Item hasFeedback={true} validateStatus={this.validateStatus('beneficiaryDisposition', index)} required>
+                                        <Input onChange={this.handleChange('beneficiaryDisposition', index)} type='number' min={1} value={this.state.beneficiaryDisposition[index]} />
+                                    </Item>
+                                </Col>
+                                <Col span={4}>
+                                    <Item >
+                                        <Input disabled={true} value={ web3Scripts.parseEtherValue(this.calcValue(this.state.beneficiaryDisposition[index]), true) } />
+                                    </Item>
+                                </Col>
+                                <Col span={2}>
+                                    <Button style={{ marginTop: '4px' }} icon='minus-square' title={FormHelp.removeBeneficiary} onClick={this.removeBeneficiary(index)} />
+                                </Col>
+                            </Row>
+                        )
                     }
                     <Row gutter={16}>
-                        <Col span={12}>
+                        <Col span={15}>
                             <Item hasFeedback={true} validateStatus={this.validateStatus('newBeneficiary')} required>
                                 <Input onChange={this.handleChange('newBeneficiary')} value={this.state.newBeneficiary} />
                             </Item>
                         </Col>
-                        <Col span={4}>
+                        <Col span={3}>
                             <Item hasFeedback={true} validateStatus={this.validateStatus('newBeneficiaryDisposition')} required>
-                                <Input onChange={this.handleChange('newBeneficiaryDisposition')} value={this.state.newBeneficiaryDisposition} />
-                            </Item>
-                        </Col>
-                        <Col span={2}>
-                            <Item hasFeedback={true} validateStatus={this.validateStatus('newBeneficiaryDispositionPercentage')} required>
-                                <Input onChange={this.handleChange('newBeneficiaryDispositionPercentage')} value={this.state.newBeneficiaryDispositionPercentage} />
+                                <Input onChange={this.handleChange('newBeneficiaryDisposition')} type='number' min={1} value={this.state.newBeneficiaryDisposition} />
                             </Item>
                         </Col>
                         <Col span={4}>
-                            <Item hasFeedback={true} validateStatus={this.validateStatus('newBeneficiaryDispositionValue')} required>
-                                <Input disabled={true} value={this.state.newBeneficiaryDispositionValue} />
+                            <Item >
+                                <Input disabled={true} value={ web3Scripts.parseEtherValue(this.calcValue(this.state.newBeneficiaryDisposition), true) } />
                             </Item>
                         </Col>
                         <Col span={2}>
-                            <Button  disabled={!this.newBeneficiaryCorrect} onClick={this.addBeneficiary()}>
-                                <Icon type='plus-square' style={{ fontSize: '28px' }} />
-                            </Button>
+                            <Button style={{ marginTop: '4px' }} icon='plus-square' disabled={!this.newBeneficiaryCorrect} title={FormHelp.addNewBeneficiary} onClick={this.addBeneficiary()} />
                         </Col>
                     </Row>
                 </Form>
@@ -149,6 +180,8 @@ class Beneficiaries extends Component {
 }
 
 Beneficiaries.propTypes = {
+    drizzle: PropTypes.object.isRequired,
+    isOwner: PropTypes.bool.isRequired,
     contractAddress: PropTypes.string.isRequired,
     contractBalance: PropTypes.number.isRequired,
     networkId: PropTypes.number.isRequired,

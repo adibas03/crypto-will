@@ -77,7 +77,7 @@ class App extends Component {
   }
 
   updateSelectedAccount (event) {
-    if (this._mounted) {
+    if (this._mounted && this.state.selectedAccount !== event.key) {
       this.setState({ selectedAccount: event.key, ContractsList: [] }, () => {
         this.accountUpdated(this.state.selectedAccount);
       });
@@ -125,7 +125,7 @@ class App extends Component {
 
     return (
       <HashRouter basename='/'>
-        <Layout className="App" style={{ minWidth: '576px', maxHeight: '100vh', overflowY: 'hidden' }}>
+        <Layout className="App" style={{ minWidth: '576px', minHeight: '100vh', overflowY: 'hidden' }}>
           { !drizzleStatus.initialized &&
             <div style={{ textAlign: 'center' }}>
               {!this.state.fetchingNetwork &&
@@ -167,8 +167,8 @@ class App extends Component {
                         />
                       }
                       <Row >
-                        <Col lg={13} md={24}  >
-                          <Col sm={22} >
+                        <Col lg={14} md={24}  >
+                          <Col sm={24} lg={22} >
                             <div>
                               <Switch>
                                 <Redirect exact from='/' to='/deploy'></Redirect>
@@ -180,14 +180,14 @@ class App extends Component {
                           </Col >
                         </Col>
                         <Col lg={1} md={24} >
-                          <Col lg={1} md={0} >
-                              <Divider type='vertical' style={{ width: '2.5px', 'minHeight': '200px', 'marginLeft': '25px' }} />
+                          <Col lg={1} xs={0} >
+                              <Divider type='vertical' style={{ 'minHeight': '200px', 'marginLeft': '25px', width: '2.5px' }} />
                           </Col>
                           <Col lg={0} md={24} >
                             <Divider type='horizontal'style={{ height: '2.5px' }} />
                           </Col>
                         </Col>
-                        <Col lg={10} md={24} >
+                        <Col lg={9} md={24} >
                           <ContractsList networkUpdated={this.callOnNetworkUpdate} networkId={this.state.activeNetworkId} accountUpdated={this.callOnAccountUpdate} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} foundNewContract={this.foundContractAddress} foundContracts={this.state.ContractsList} ></ContractsList>
                         </Col>
                       </Row>

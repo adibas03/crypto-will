@@ -120,7 +120,6 @@ class ContractsList extends Component {
                 <Row gutter={0} style={{ margin: '0 0 24px' }}>
                     <Col span={20}>
                         <h2>Deployed Contracts</h2>
-                        <Divider style={{ height: '1px', margin: '0' }} />
                     </Col>
                     <Col span={4}>
                         <Row gutter={0} justify='center'>
@@ -133,6 +132,9 @@ class ContractsList extends Component {
                                 <h3>: { this.state.fetchingContracts ? '...' : this.props.foundContracts.length }</h3>
                             </Col>
                         </Row>
+                    </Col>
+                    <Col span={24} >
+                        <Divider style={{ height: '1px', margin: '0' }} />
                     </Col>
                 </Row>
                 <Layout style={{ overflowY: 'auto', maxHeight: '900px' }}>
@@ -165,7 +167,7 @@ class ContractsList extends Component {
                                     </Row>
                                     <Row>
                                         <Col span={5}>
-                                            <h4>Transaction:</h4>
+                                            <h4>Tx Hash:</h4>
                                         </Col>
                                         <Col span={19} className='word-wrapped'>{ contract.transactionHash }</Col>
                                     </Row>

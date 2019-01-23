@@ -1,4 +1,7 @@
 import { Networks } from '../Config';
+import Ownable from '../../build/contracts/Ownable.json';
+import Will from '../../build/contracts/Will.json';
+
 const ETHER = 10**18;
 
 const web3Scripts = {
@@ -22,6 +25,12 @@ const web3Scripts = {
                 resolve(res);
             })
         })
+    },
+    async getContractOwner (web3, address) {
+        const abi = Ownable.abi;
+        const contract = await new web3.eth.Contract(abi, address);
+        const owner = await contract.methods.owner().call();
+        return owner;
     },
     async deployContract ({ Deployer, fromAddress, type, args, onTransactionHash, onReceipt }) {
         if (!Deployer) {
@@ -95,6 +104,21 @@ const web3Scripts = {
         const txHash = Contract.contractArtifact.networks[network].transactionHash;
         const receipt = await Contract.web3.eth.getTransactionReceipt(txHash);
         return receipt;
+    },
+    async fetchBeneficiaries (drizzle, address) {
+        if (!drizzle.contracts[address]) {
+            await this.loadDrizzleContract(drizzle, address, Will.abi, ['BeneficiaryUpdated', 'BeneficiarySettled']);
+        }
+        const contract = drizzle.contracts[address];
+        // const beneficiaries = await contract.methods.beneficiaries().call();
+        // console.log(beneficiaries);
+        return beneficiaries;
+    },
+    async loadDrizzleContract (drizzle, address, abi, events) {
+        await drizzle.addContract({
+            contractName: address,
+            web3Contract: await new drizzle.web3.eth.Contract(abi, address)
+        }, events);
     },
     // async fetchPastEvents ( Contract, event, fromBlock, filter={}, topics=[]) {
     //     return Contract.getPastEvents(

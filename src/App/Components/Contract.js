@@ -37,6 +37,10 @@ class Contract extends Component {
         loadingContracts: false
     }
 
+    get isContractOwner () {
+        return (this.state.contract && this.state.contract.owner) === this.props.selectedAccount;
+    }
+
     get contractHasBeneficiaries () {
         const hasBeneficiaries = this.state.contract.contractType ? 
             [ ContractTypes[0], ContractTypes[2] ].some( type => type.toLowerCase() === this.state.contract.contractType.toLowerCase()) :
@@ -97,7 +101,8 @@ class Contract extends Component {
                     blockNumber: await this.getContractDeploymentBlock(contractAddress),
                     contractType: await this.getContractType(contractAddress),
                     transactionHash: await this.getContractDeploymentHash(contractAddress),
-                    balance: await this.getContractBalance(contractAddress)
+                    balance: await this.getContractBalance(contractAddress),
+                    owner: await this.getContractOwner(contractAddress)
                 },
                 loadingContracts: false
             });
@@ -134,9 +139,14 @@ class Contract extends Component {
         return balance.toNumber ? balance.toNumber() : 0;
     }
 
+    async getContractOwner (address) {
+        const owner = await web3Scripts.getContractOwner(this.props.drizzle.web3, address);
+        return owner;
+    }
+
     async getContractType (address) {
-            const receipt =  await this.resolveContractDeploymentReceipt(address);
-            return receipt && receipt.returnValues.contractType;
+        const receipt =  await this.resolveContractDeploymentReceipt(address);
+        return receipt && receipt.returnValues.contractType;
     }
 
     async getContractDeploymentBlock(address) {
@@ -167,7 +177,7 @@ class Contract extends Component {
                         <Row gutter={0} style={{ margin: '0 0 24px' }}>
                             <Col span={24}>
                                 <h2>Contracts details</h2>
-                                <h4>
+                                <h4 className='word-wrapped'>
                                     (<a target='_blank' href={`${Explorers[this.props.networkId]}/address/${this.props.match.params.contractAddress}`}>
                                         { this.props.match.params.contractAddress }
                                     </a>)
@@ -184,7 +194,7 @@ class Contract extends Component {
                                     <b>Block: </b>{ contract.blockNumber }
                                 </p>
                                 <p className='word-wrapped'>
-                                    <b>Transaction: </b><a target='_blank' href={`${Explorers[this.props.networkId]}/tx/${contract.transactionHash}`}>{ contract.transactionHash }</a>
+                                    <b>Tx Hash: </b><a target='_blank' href={`${Explorers[this.props.networkId]}/tx/${contract.transactionHash}`}>{ contract.transactionHash }</a>
                                 </p>
                                 <p className='word-wrapped'>
                                     <b>Balance: </b>{ web3Scripts.parseEtherValue(contract.balance, true) } Eth
@@ -193,7 +203,7 @@ class Contract extends Component {
                         </Row>
                         { this.contractHasBeneficiaries &&
                             <div>
-                                <Beneficiaries contractAddress={ this.state.contract.address } networkId={ this.props.networkId } contractBalance={ contract.balance }/>
+                                <Beneficiaries contractAddress={ this.state.contract.address } networkId={ this.props.networkId } contractBalance={ contract.balance } isOwner={ this.isContractOwner } drizzle={ this.props.drizzle }/>
                             </div>
                         }
                     </Layout>
