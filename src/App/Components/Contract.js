@@ -41,7 +41,7 @@ class Contract extends Component {
         return (this.state.contract && this.state.contract.owner) === this.props.selectedAccount;
     }
 
-    get contractHasBeneficiaries () {
+    get shouldHaveBeneficiaries () {
         const hasBeneficiaries = this.state.contract.contractType ? 
             [ ContractTypes[0], ContractTypes[2] ].some( type => type.toLowerCase() === this.state.contract.contractType.toLowerCase()) :
             false;
@@ -201,7 +201,7 @@ class Contract extends Component {
                                 </p>
                             </Col>
                         </Row>
-                        { this.contractHasBeneficiaries &&
+                        { this.shouldHaveBeneficiaries &&
                             <div>
                                 <Beneficiaries contractAddress={ this.state.contract.address } networkId={ this.props.networkId } contractBalance={ contract.balance } isOwner={ this.isContractOwner } drizzle={ this.props.drizzle }/>
                             </div>
