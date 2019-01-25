@@ -13,7 +13,8 @@ const FormHelp = {
     newBeneficiary: 'The ethereum address you want to add as a beneficiary for the Will',
     newBeneficiaryDisposition: 'The desired portion to allocate to the address',
     newBeneficiaryDispositionPercentage: 'The desired percentage of the Will to allocate to the address',
-    newBeneficiaryDispositionValue: 'The actual value based on the present contract balance'
+    newBeneficiaryDispositionValue: 'The actual value based on the present contract balance',
+    updateContract: 'Store changes to contract'
 };
 
 export { FormHelp }; 

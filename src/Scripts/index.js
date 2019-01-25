@@ -1,1 +1,1 @@
-export { web3Scripts } from './web3Scripts';
+export { web3Scripts, CONTRACT_ARRAYs_LENGTH } from './web3Scripts';

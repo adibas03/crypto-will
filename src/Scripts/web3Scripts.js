@@ -4,6 +4,7 @@ import Will from '../../build/contracts/Will.json';
 
 const ETHER = 10**18;
 const CONTRACT_ARRAYs_LENGTH = 10;
+const BENEFICIARYEVENT = 'BeneficiaryUpdated';
 
 const web3Scripts = {
     async getNetworkId (web3) {
@@ -106,20 +107,42 @@ const web3Scripts = {
         const receipt = await Contract.web3.eth.getTransactionReceipt(txHash);
         return receipt;
     },
+    async isContractDisbursed (Contract) {
+        return await Contract.methods.disbursed().call();
+    },
+    async isContractDisbursing (Contract) {
+        return await Contract.methods.disbursing().call();
+    },
     async fetchBeneficiaries (drizzle, newtworkId, address) {
         if (!drizzle.contracts[address]) {
             await this.loadDrizzleContract(drizzle, address, Will.abi, ['BeneficiaryUpdated', 'BeneficiarySettled']);
         }
         const contract = drizzle.contracts[address];
+        const totalBeneficiaries = await contract.methods.totalBeneficiaries().call();
+        if (totalBeneficiaries === 1) {
+            return [];
+        }
+        const beneficiaries = [];
         const receipt = await this.getDeploymentReceipt(drizzle.contracts.Deployer, newtworkId, address);
         const events = this.subscribeEvents(contract, 'allEvents', receipt.blockNumber);
+        await new Promise ((resolve, reject) => {
+
         this.setupListeners(events, {
-            onData: (err, res) => {
+                onData: (data) => {
+                    this.getBeneficiaryFromEvent(data, beneficiaries);
+                    if(beneficiaries.length === totalBeneficiaries-1) {
+                        resolve(true);
             }
+                },
+                onError: (err, res) => {
+                    console.log(err, res);
+                    if (err) {
+                        reject(err);
         });
         // const beneficiaries = await contract.methods.beneficiaries().call();
         // console.log(beneficiaries);
         return [];
+        return beneficiaries;
     },
     async addBeneficiaries (from, contract, beneficiaries, dispositions) {
         console.log(arguments);
@@ -163,6 +186,25 @@ const web3Scripts = {
     // },
     async unsubscribeEvent (event) {
         return await event.unsubscribe();
+    },
+    getBeneficiaryFromEvent(event, store) {
+        if (event.event !== BENEFICIARYEVENT) {
+            return ;
+        }
+        address = event.returnValues.beneficiary;
+        disposition = event.returnValues.disposition;
+        const found = store.find(item => item.address === address);
+        const foundIndex = store.findIndex(item => item.address === address);
+        if (disposition === 0 && found) {
+            return delete(store[foundIndex]);
+        } else if(found && disposition !== found.disposition) {
+            return store[foundIndex] = disposition;
+        } else if (!found) {
+            store.push({
+                adress,
+                disposition
+            })
+        }
     },
     parseEtherValue (number = 0, inbound) {
         number = number.toNumber ? number.toNumber() : Number(number);
