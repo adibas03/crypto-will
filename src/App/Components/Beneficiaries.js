@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 
-import { web3Scripts } from '../../Scripts';
+import { web3Scripts, CONTRACT_ARRAYs_LENGTH } from '../../Scripts';
 import { FormHelp } from '../../Config';
 
 import Button from 'antd/lib/button';
@@ -36,6 +36,7 @@ class Beneficiaries extends Component {
 
         this.addBeneficiary = this.addBeneficiary.bind(this);
         this.calcValue = this.calcValue.bind(this);
+        this.storeToNetwork = this.storeToNetwork.bind(this);
         this.validateStatus = this.validateStatus.bind(this);
     }
 
@@ -71,14 +72,29 @@ class Beneficiaries extends Component {
     }
 
     async storeToNetwork () {
-        let addCall;
-        let removeCall;
+        let addTx;
+        let removeTx;
         if (this.state.beneficiariesToAdd && this.state.beneficiariesToAdd.length > 0) {
-            addCall = web3Scripts.addBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], this.state.beneficiariesToAdd);
+            const addLength = Math.ceil(this.state.beneficiariesToAdd / CONTRACT_ARRAYs_LENGTH);
+            const addTx = [];
+            for (let i =0; i<addLength; i++) {
+                addTx.push(web3Scripts.addBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], this.state.beneficiariesToAdd));
+            }
+            console.log(addTx)
         }
         if (this.state.beneficiariesToRemove && this.state.beneficiariesToRemove.length > 0) {
-            removeCall = web3Scripts.removeBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], this.state.beneficiariesToRemove);
+            const remLength = Math.ceil(this.state.beneficiariesToAdd / CONTRACT_ARRAYs_LENGTH);
+            const removeTx = [];
+            for (let i =0; i<remLength; i++) {
+                removeTx.push(web3Scripts.removeBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], this.state.beneficiariesToRemove));
+            }
+            console.log(removeTx)
         }
+        this.resolveTransactions(addTx.concat(removeTx));
+    }
+
+    async resolveTransactions (transactions) {
+        console.log(arguments)
     }
 
     addBeneficiary () {

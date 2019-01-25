@@ -3,6 +3,7 @@ import Ownable from '../../build/contracts/Ownable.json';
 import Will from '../../build/contracts/Will.json';
 
 const ETHER = 10**18;
+const CONTRACT_ARRAYs_LENGTH = 10;
 
 const web3Scripts = {
     async getNetworkId (web3) {
@@ -120,9 +121,31 @@ const web3Scripts = {
         // console.log(beneficiaries);
         return [];
     },
-    async addBeneficiaries (contract) {
+    async addBeneficiaries (from, contract, beneficiaries, dispositions) {
+        console.log(arguments);
+        if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
+            throw new Error(`Beneficiaries must be at least one and at least ten: ${beneficiaries.length} found`);
+        }
+        if (dispositions.length < 1 || dispositions.length > 10) {
+            throw new Error(`Dispositions must be at least one and at least ten: ${dispositions.length} found`);
+        }
+        if  (beneficiaries.length != dispositions.length) {
+            throw new Error(`Beneficiaries and Dispositions do not match`);
+        }
+        const txHash = contract.methods.updateBeneficiaries.cacheSend(beneficiaries, dispositions, {
+            from
+        });
+        return txHash;
     },
-    async removeBeneficiaries () {
+    async removeBeneficiaries (from, contract, beneficiaries) {
+        console.log(arguments);
+        if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
+            throw new Error(`Beneficiaries must be at least one and at least ten: ${beneficiaries.length} found`);
+        }
+        const txHash = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
+            from
+        });
+        return txHash;
     },
     async loadDrizzleContract (drizzle, address, abi, events) {
         await drizzle.addContract({
@@ -227,4 +250,4 @@ const web3Scripts = {
     }
 }
 
-export { web3Scripts };
+export { web3Scripts, CONTRACT_ARRAYs_LENGTH };
