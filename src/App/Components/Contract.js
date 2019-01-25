@@ -203,7 +203,15 @@ class Contract extends Component {
                         </Row>
                         { this.shouldHaveBeneficiaries &&
                             <div>
-                                <Beneficiaries contractAddress={ this.state.contract.address } networkId={ this.props.networkId } contractBalance={ contract.balance } isOwner={ this.isContractOwner } drizzle={ this.props.drizzle }/>
+                                <Beneficiaries
+                                    selectedAccount={ this.props.selectedAccount }
+                                    contractAddress={ this.state.contract.address }
+                                    networkId={ this.props.networkId }
+                                    contractBalance={ contract.balance }
+                                    isOwner={ this.isContractOwner }
+                                    drizzle={ this.props.drizzle }
+                                    transactionStack={this.props.transactionStack}
+                                />
                             </div>
                         }
                     </Layout>
@@ -219,7 +227,8 @@ Contract.propTypes = {
     drizzle: PropTypes.object.isRequired,
     match: PropTypes.object.isRequired,
     networkId: PropTypes.number,
-    selectedAccount: PropTypes.string
+    selectedAccount: PropTypes.string,
+    transactionStack: PropTypes.array
 }
 
 export default ErrorBoundary(NetworkComponent(Contract));

@@ -174,8 +174,21 @@ class App extends Component {
                                 <Redirect exact from='/' to='/deploy'></Redirect>
                                 <Redirect exact from='/contract' to='/deploy'></Redirect>
                               </Switch>
-                              <Route exact path='/deploy' render= {(props) => <Deployer {...props} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} transactionStack={this.props.transactionStack} transactions={this.props.transactions}/>} ></Route>
-                              <Route exact path='/contract/:contractAddress' render={(props) => <Contract {...props} networkId={this.state.activeNetworkId} selectedAccount={this.state.selectedAccount} drizzle={this.state.drizzle} contractsList={this.state.ContractsList}/>}></Route>
+                              <Route exact path='/deploy'
+                                render= {(props) => <Deployer {...props}
+                                selectedAccount={this.state.selectedAccount}
+                                DeployerContract={this.state.drizzle.contracts.Deployer}
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}/>} >
+                              </Route>
+                              <Route exact path='/contract/:contractAddress'
+                                render={(props) => <Contract {...props}
+                                networkId={this.state.activeNetworkId}
+                                selectedAccount={this.state.selectedAccount}
+                                drizzle={this.state.drizzle}
+                                transactionStack={this.props.transactionStack}
+                                contractsList={this.state.ContractsList}/>}>
+                              </Route>
                             </div>
                           </Col >
                         </Col>
@@ -188,7 +201,15 @@ class App extends Component {
                           </Col>
                         </Col>
                         <Col lg={9} md={24} >
-                          <ContractsList networkUpdated={this.callOnNetworkUpdate} networkId={this.state.activeNetworkId} accountUpdated={this.callOnAccountUpdate} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} foundNewContract={this.foundContractAddress} foundContracts={this.state.ContractsList} ></ContractsList>
+                          <ContractsList
+                            networkUpdated={this.callOnNetworkUpdate}
+                            networkId={this.state.activeNetworkId}
+                            accountUpdated={this.callOnAccountUpdate}
+                            selectedAccount={this.state.selectedAccount}
+                            DeployerContract={this.state.drizzle.contracts.Deployer}
+                            foundNewContract={this.foundContractAddress}
+                            foundContracts={this.state.ContractsList} >
+                          </ContractsList>
                         </Col>
                       </Row>
                       { JSON.stringify(this.props.drizzleStatus) }

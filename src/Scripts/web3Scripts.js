@@ -105,14 +105,24 @@ const web3Scripts = {
         const receipt = await Contract.web3.eth.getTransactionReceipt(txHash);
         return receipt;
     },
-    async fetchBeneficiaries (drizzle, address) {
+    async fetchBeneficiaries (drizzle, newtworkId, address) {
         if (!drizzle.contracts[address]) {
             await this.loadDrizzleContract(drizzle, address, Will.abi, ['BeneficiaryUpdated', 'BeneficiarySettled']);
         }
         const contract = drizzle.contracts[address];
+        const receipt = await this.getDeploymentReceipt(drizzle.contracts.Deployer, newtworkId, address);
+        const events = this.subscribeEvents(contract, 'allEvents', receipt.blockNumber);
+        this.setupListeners(events, {
+            onData: (err, res) => {
+            }
+        });
         // const beneficiaries = await contract.methods.beneficiaries().call();
         // console.log(beneficiaries);
-        return beneficiaries;
+        return [];
+    },
+    async addBeneficiaries (contract) {
+    },
+    async removeBeneficiaries () {
     },
     async loadDrizzleContract (drizzle, address, abi, events) {
         await drizzle.addContract({
@@ -190,9 +200,9 @@ const web3Scripts = {
             });
         }
     },
-    watchWeb3Addresses (web3, ) {
-        web3
-    },
+    // watchWeb3Addresses (web3, ) {
+    //     web3
+    // },
     setupListeners (event, { onTransactionHash, onReceipt, onData, onChanged, onError }) {
         if (onError) {
             event

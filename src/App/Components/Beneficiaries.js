@@ -35,11 +35,14 @@ class Beneficiaries extends Component {
         super(props);
 
         this.addBeneficiary = this.addBeneficiary.bind(this);
+        this.calcValue = this.calcValue.bind(this);
         this.validateStatus = this.validateStatus.bind(this);
     }
 
     state = {
         beneficiaries: [],
+        beneficiariesToAdd: [],
+        beneficiariesToRemove: [],
         newBeneficiary: '',
         newBeneficiaryDisposition: '',
         newBeneficiaryDispositionPercentage: '',
@@ -50,24 +53,40 @@ class Beneficiaries extends Component {
         return this.props.isOwner;
     }
 
+    get getTotalRatio () {
+        let total =  0;
+        if (this.state.beneficiaries && this.state.beneficiaries.length > 0) {
+            this.state.beneficiaries.map(bene => {
+                total += bene.disposition
+            });
+        }
+        return total;
+    }
+
     async loadBeneficiaries () {
-        console.log(this.props);
         this.setState({
-            beneficiaries: await web3Scripts.fetchBeneficiaries(this.props.drizzle, this.props.contractAddress)
+            beneficiaries: await web3Scripts.fetchBeneficiaries(this.props.drizzle, this.props.networkId, this.props.contractAddress)
         })
         // this.props.contractAddress;
-        
+    }
+
+    async storeToNetwork () {
+        let addCall;
+        let removeCall;
+        if (this.state.beneficiariesToAdd && this.state.beneficiariesToAdd.length > 0) {
+            addCall = web3Scripts.addBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], this.state.beneficiariesToAdd);
+        }
+        if (this.state.beneficiariesToRemove && this.state.beneficiariesToRemove.length > 0) {
+            removeCall = web3Scripts.removeBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], this.state.beneficiariesToRemove);
+        }
     }
 
     addBeneficiary () {
     }
 
-    getTotalRatio () {
-        // const total = this.state.beneficiaries;
-    }
-
-    calcValue (amount) {
-        return this.contractAddress
+    calcValue (ratio) {
+        const amount = ((this.props.contractBalance * ratio) / this.getTotalRatio) || 0;
+        return web3Scripts.parseEtherValue(amount, true);
     }
 
     updateArray (array, index, value) {
@@ -185,6 +204,7 @@ Beneficiaries.propTypes = {
     contractAddress: PropTypes.string.isRequired,
     contractBalance: PropTypes.number.isRequired,
     networkId: PropTypes.number.isRequired,
+    selectedAccount: PropTypes.string
 }
 
 export default ErrorBoundary(NetworkComponent(Beneficiaries));
