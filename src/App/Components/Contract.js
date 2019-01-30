@@ -135,8 +135,8 @@ class Contract extends Component {
     }
 
     async getContractBalance (address) {
-        const balance = await web3Scripts.getAddressBalance(address);
-        return balance.toNumber ? balance.toNumber() : 0;
+        const balance = await web3Scripts.getAddressBalance(this.props.drizzle.web3, address);
+        return balance.toNumber ? balance.toNumber() : (Number(balance) || 0);
     }
 
     async getContractOwner (address) {

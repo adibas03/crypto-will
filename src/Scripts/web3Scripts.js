@@ -18,7 +18,10 @@ const web3Scripts = {
             })
         })
     },
-    async getAddressBalance (address) {
+    async getAddressBalance (web3, address) {
+        if (!this.isValidAddress(web3, address)) {
+            throw new Error('Not a valid address');
+        }
         return new Promise((resolve, reject) => {
             web3.eth.getBalance(address, function(err, res) {
                 if (err) {
@@ -126,7 +129,6 @@ const web3Scripts = {
         const receipt = await this.getDeploymentReceipt(drizzle.contracts.Deployer, newtworkId, address);
         const events = this.subscribeEvents(contract, 'allEvents', receipt.blockNumber);
         await new Promise ((resolve, reject) => {
-
         this.setupListeners(events, {
                 onData: (data) => {
                     this.getBeneficiaryFromEvent(data, beneficiaries);
@@ -134,10 +136,11 @@ const web3Scripts = {
                         resolve(true);
             }
                 },
-                onError: (err, res) => {
-                    console.log(err, res);
+                onError: (err) => {
                     if (err) {
                         reject(err);
+                    }
+                }
         });
         // const beneficiaries = await contract.methods.beneficiaries().call();
         // console.log(beneficiaries);
@@ -205,6 +208,9 @@ const web3Scripts = {
                 disposition
             })
         }
+    },
+    isValidAddress (web3, address) {
+        return web3.utils.isAddress(address);
     },
     parseEtherValue (number = 0, inbound) {
         number = number.toNumber ? number.toNumber() : Number(number);
