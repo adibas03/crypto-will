@@ -86,7 +86,12 @@ class App extends Component {
 
   foundContractAddress (deployLog) {
     if (this._mounted) {
-      this.state.ContractsList.push(deployLog);
+
+      //Object comparison hack
+      const found = this.state.ContractsList.some(contract => JSON.stringify(contract) === JSON.stringify(deployLog));
+      if (!found)  {
+        this.state.ContractsList.push(deployLog);
+      }
     }
   }
 

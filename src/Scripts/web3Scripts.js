@@ -5,6 +5,7 @@ import Will from '../../build/contracts/Will.json';
 const ETHER = 10**18;
 const CONTRACT_ARRAYs_LENGTH = 10;
 const BENEFICIARYEVENT = 'BeneficiaryUpdated';
+const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const web3Scripts = {
     async getNetworkId (web3) {
@@ -188,7 +189,14 @@ const web3Scripts = {
     //     );
     // },
     async unsubscribeEvent (event) {
-        return await event.unsubscribe();
+        return await new Promise ((resolve, reject) => {
+            event.unsubscribe((err, success) => {
+                if (err) {
+                    reject(err);
+                }
+                resolve(success);
+            });
+        });
     },
     getBeneficiaryFromEvent(event, store) {
         if (event.event !== BENEFICIARYEVENT) {
@@ -245,11 +253,14 @@ const web3Scripts = {
     //     );
     // },
     subscribeEvents ( Contract, event, fromBlock, filter={}, topics=[]) {
-        return Contract.events[event]({
+        const options = {
             fromBlock,
-            filter,
-            topics
-        });
+            filter
+        };
+        if (topics && topics.length > 0) {
+            options.push(topics);
+        }
+        return Contract.events[event](options);
     },
     getNetwork (id) {
         return Networks[id] || 'Unknown';
@@ -298,4 +309,4 @@ const web3Scripts = {
     }
 }
 
-export { web3Scripts, CONTRACT_ARRAYs_LENGTH };
+export { web3Scripts, CONTRACT_ARRAYs_LENGTH, NULL_ADDRESS };

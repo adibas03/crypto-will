@@ -57,9 +57,11 @@ class ContractsList extends Component {
         if (!this._mounted) {
             return;
         }
-        this.setState({ activeAccount: this.props.selectedAccount }, () => {
-            this.fetchDeployedContracts();
-        });
+        if (!this.accountLoaded()) {
+            // this.setState({ activeAccount: this.props.selectedAccount }, () => {
+                this.fetchDeployedContracts();
+            // });
+        }
     }
 
     accountLoaded () {
@@ -79,11 +81,17 @@ class ContractsList extends Component {
             return ;
         }
         if (this.state.runningSubscription) {
-            web3Scripts.stopSubscription(this.state.runningSubscription);
+            await web3Scripts.unsubscribeEvent(this.state.runningSubscription);
         }
-        this.setState({ fetchingContracts: true });
+        const selectedAccount = this.props.selectedAccount;
+
+        this.setState({
+            foundContracts: [],
+            fetchingContracts: true,
+            runningSubscription: null
+        });
         try {
-            const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, { creator: this.state.activeAccount }, {
+            const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, { creator: [ selectedAccount ] }, {
                 onData: (event) => {
                     this.props.foundNewContract(event);
                     this.forceUpdate();
@@ -91,11 +99,13 @@ class ContractsList extends Component {
                 onChanged: (event) => console.log('Changed', event)
             });
 
-            this.setState({
-                runningSubscription: fetchSubscription
+            fetchSubscription.then(sub => {
+                this.setState({
+                    activeAccount: selectedAccount,
+                    runningSubscription: sub,
+                    fetchingContracts: false
+                });
             });
-            await fetchSubscription;
-            this.setState({ fetchingContracts: false });
         } catch (e) {
             notification['error']({
                 duration: 0,

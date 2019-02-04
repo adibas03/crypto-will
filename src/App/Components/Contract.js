@@ -59,7 +59,7 @@ class Contract extends Component {
         this.stopWatchingBalance();
         const balanceWatcher = setTimeout(async () => {
             const balance = await this.getContractBalance(this.state.contract.address);
-            if (balance !== this.state.contract.balance) {
+            if (this._mounted && balance !== this.state.contract.balance) {
                 this.setState({ contract: { balance: balance }}); 
             }
             this.watchContractBalance();
@@ -84,7 +84,7 @@ class Contract extends Component {
         }
     }
 
-    UNSAFE_componentWillUnmount () {
+    componentWillUnmount () {
         this.stopWatchingBalance();
     }
 
