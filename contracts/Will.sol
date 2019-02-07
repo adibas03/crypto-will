@@ -88,6 +88,7 @@ contract Will is Ownable {
   returns (bool)
   {
     require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
+    require(_beneficiary != beneficiaries[0], 'Cannot update Contract Owner disposition');
     require(_disposition > 0, 'Disposition must be greter than 0');
     require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
     if (getBeneficiaryIndex(_beneficiary) == 0) {
