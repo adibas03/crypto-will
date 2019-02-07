@@ -145,10 +145,12 @@ class App extends Component {
               <Layout>
                 <Content>
                   <Layout style={{ margin: '16px 56px 0' }}>
+                    <span>
                       <Link to='/'>
                           <h1 className="App-title">Crypto will </h1>
                       </Link>
-                      <h5>( {this.state.activeNetwork || 'No connected'} network )</h5>
+                    </span>
+                    <h5>( {this.state.activeNetwork || 'No connected'} network )</h5>
                   </Layout>
                   <Layout>
                     <Accounts {...{ accounts: this.props.accounts, selected: this.state.selectedAccount, selectAccount: this.updateSelectedAccount }} />

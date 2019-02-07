@@ -159,10 +159,8 @@ class Beneficiaries extends Component {
         if (this.beneficiariesToRemove && this.beneficiariesToRemove.length > 0) {
             for (let i =0; i<remLength; i++) {
                 let start = (i*CONTRACT_ARRAYs_LENGTH);
-                console.log(toRemove);
                 let batchRemoveBeneficiaries = this.beneficiariesToRemove.slice(start, start+CONTRACT_ARRAYs_LENGTH);
                 let toRemove = Array(10).fill(NULL_ADDRESS).map((empty, index ) => batchRemoveBeneficiaries[index] || empty);
-                console.log(toRemove)
                 removeTx.push(web3Scripts.removeBeneficiaries(this.props.selectedAccount, this.props.drizzle.contracts[this.props.contractAddress], toRemove));
             }
         }
