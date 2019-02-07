@@ -192,6 +192,7 @@ class App extends Component {
                                 selectedAccount={this.state.selectedAccount}
                                 drizzle={this.state.drizzle}
                                 transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}
                                 contractsList={this.state.ContractsList}/>}>
                               </Route>
                             </div>

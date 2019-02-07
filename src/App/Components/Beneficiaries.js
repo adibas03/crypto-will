@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 
-import { web3Scripts, CONTRACT_ARRAYs_LENGTH } from '../../Scripts';
+import { web3Scripts, CONTRACT_ARRAYs_LENGTH, NULL_ADDRESS } from '../../Scripts';
 import { FormHelp } from '../../Config';
 
 import Button from 'antd/lib/button';
@@ -49,20 +49,21 @@ class Beneficiaries extends Component {
         contractBeneficiaries: [],
         disbursed: false,
         dispositions: [''],
-        loading: false
+        loading: false,
+        storingToContract: false
     }
 
     get contractBeneficiaries () {
         const beneficiaries = [];
-        this.state.contractBeneficiaries.forEach((contractBeneficiary, index) => {
-            beneficiaries.push(contractBeneficiary.beneficiary);
+        this.state.contractBeneficiaries.forEach((contractBeneficiary) => {
+            beneficiaries.push(contractBeneficiary.address);
         });
         return beneficiaries;
     }
 
     get contractDispositions () {
         const dispositions = [];
-        this.state.contractBeneficiaries.forEach((contractBeneficiary, index) => {
+        this.state.contractBeneficiaries.forEach((contractBeneficiary) => {
             dispositions.push(contractBeneficiary.disposition);
         });
         return dispositions;
@@ -74,8 +75,8 @@ class Beneficiaries extends Component {
         const contractBeneficiaries = this.contractBeneficiaries;
         const contractDispositions = this.contractDispositions;
         this.state.beneficiaries.map((beneficiary, index) => {
-            const foundIndex = contractBeneficiaries.findIndex(one => one ===beneficiary);
-            if (foundIndex < 0 || contractDispositions[foundIndex] !== this.state.dispositions[index]) {
+            const foundIndex = contractBeneficiaries.findIndex(one => one.toLowerCase() === beneficiary.toLowerCase());
+            if (foundIndex < 0 || contractDispositions[foundIndex] != this.state.dispositions[index]) {
                 toAdd.push(beneficiary);
             }
         });
@@ -86,7 +87,7 @@ class Beneficiaries extends Component {
         const toRemove = [];
         const contractBeneficiaries = this.contractBeneficiaries;
         contractBeneficiaries.map((beneficiary) => {
-            const foundIndex = this.state.beneficiaries.findIndex(one => one ===beneficiary);
+            const foundIndex = this.state.beneficiaries.findIndex(one => one.toLowerCase() === beneficiary.toLowerCase());
             if (foundIndex < 0) {
                 toRemove.push(beneficiary);
             }
@@ -95,11 +96,17 @@ class Beneficiaries extends Component {
     }
 
     get shouldUpdate() {
-        return (this.beneficiariesToRemove && this.beneficiariesToRemove.length > 0) || (this.beneficiariesToAdd && this.beneficiariesToAdd.length > 0);
+        const removeBeneficiaries = this.beneficiariesToRemove && this.beneficiariesToRemove.length > 0 && !this.beneficiariesToRemove.some(beneficiary => !web3Scripts.isValidAddress(this.props.drizzle.web3, beneficiary));
+        let addBeneficiaries = this.beneficiariesToAdd && this.beneficiariesToAdd.length > 0 && !this.beneficiariesToAdd.some(beneficiary => !web3Scripts.isValidAddress(this.props.drizzle.web3, beneficiary));
+        if (this.beneficiariesToAdd.length > 0) {
+            const toAddDispositions = this.beneficiariesToAdd.map(bene => this.fetchBeneficiaryDisposition(bene)).map(disposition => disposition || 0);
+            addBeneficiaries = addBeneficiaries && !toAddDispositions.some((disp, ind) => !this.validateDisposition(ind));
+        }
+        return this.props.isOwner && (removeBeneficiaries || addBeneficiaries);
     }
 
     get canUpdate () {
-        return !this.state.loading && !this.state.disbursed && this.shouldUpdate;
+        return !this.state.loading && !this.state.storingToContract && !this.state.disbursed && this.shouldUpdate;
     }
 
     get getTotalRatio () {
@@ -116,48 +123,147 @@ class Beneficiaries extends Component {
         this.setState({
             loading: true
         });
-        const beneficiaries = (await web3Scripts.fetchBeneficiaries(this.props.drizzle, this.props.networkId, this.props.contractAddress)) || [];
+        const beneficiaries = await web3Scripts.fetchBeneficiaries(this.props.drizzle, this.props.networkId, this.props.contractAddress);
         this.setState({
             contractBeneficiaries: beneficiaries,
             disbursed: await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]),
             loading: false
-        });
+        }, () => { this. updateBeneficiariesFromContract(); });
     }
 
     async storeToNetwork () {
-        let addTx;
-        let removeTx;
+        const addTx = [];
+        const removeTx = [];
+        
+        this.setState({
+            storingToContract: true
+        })
+
+        const addLength = Math.ceil(this.beneficiariesToAdd.length / CONTRACT_ARRAYs_LENGTH);
+        const remLength = Math.ceil(this.beneficiariesToRemove.length / CONTRACT_ARRAYs_LENGTH);
+        
+        notification['info']({
+            message: 'Sending Transactions',
+            description: `You will need to approve a total of ${addLength + remLength} transaction(s)`
+        });
+
         if (this.beneficiariesToAdd && this.beneficiariesToAdd.length > 0) {
-            const addLength = Math.ceil(this.beneficiariesToAdd / CONTRACT_ARRAYs_LENGTH);
-            const addTx = [];
             for (let i =0; i<addLength; i++) {
                 let start = (i*CONTRACT_ARRAYs_LENGTH);
-                let toAdd = Array(10).fill.apply(null, this.beneficiariesToAdd.slice(start , start+CONTRACT_ARRAYs_LENGTH) );
-                let toAddDispositions = toAdd.map(bene => this.fetchBeneficiaryDisposition(bene));
-                addTx.push(web3Scripts.addBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], toAdd, toAddDispositions));
+                let batchBeneficiaries = this.beneficiariesToAdd.slice(start , start+CONTRACT_ARRAYs_LENGTH);
+                let toAdd = Array(10).fill(NULL_ADDRESS).map((empty, index) => batchBeneficiaries[index] || empty);
+                let toAddDispositions = toAdd.map(bene => this.fetchBeneficiaryDisposition(bene)).map(disposition => disposition || 0);
+                addTx.push(web3Scripts.addBeneficiaries(this.props.selectedAccount, this.props.drizzle.contracts[this.props.contractAddress], toAdd, toAddDispositions));
             }
-            console.log(addTx)
         }
         if (this.beneficiariesToRemove && this.beneficiariesToRemove.length > 0) {
-            const remLength = Math.ceil(this.beneficiariesToAdd / CONTRACT_ARRAYs_LENGTH);
-            const removeTx = [];
             for (let i =0; i<remLength; i++) {
                 let start = (i*CONTRACT_ARRAYs_LENGTH);
-                let toRemove = Array(10).fill.apply(null, this.state.beneficiariesToRemove.slice(start, start+CONTRACT_ARRAYs_LENGTH));
-                let toRemove = Array(10).fill.apply(null, this.beneficiariesToRemove.slice(start, start+CONTRACT_ARRAYs_LENGTH));
-                removeTx.push(web3Scripts.removeBeneficiaries(this.props.selectedAccount, drizzle.contracts[this.props.contractAddress], toRemove));
+                console.log(toRemove);
+                let batchRemoveBeneficiaries = this.beneficiariesToRemove.slice(start, start+CONTRACT_ARRAYs_LENGTH);
+                let toRemove = Array(10).fill(NULL_ADDRESS).map((empty, index ) => batchRemoveBeneficiaries[index] || empty);
+                console.log(toRemove)
+                removeTx.push(web3Scripts.removeBeneficiaries(this.props.selectedAccount, this.props.drizzle.contracts[this.props.contractAddress], toRemove));
             }
-            console.log(removeTx)
         }
         this.resolveTransactions(addTx.concat(removeTx));
     }
 
-    async resolveTransactions (transactions) {
-        console.log(arguments)
+    async resolveTransactions (transactionStack) {
+        transactionStack.forEach((txStack, ind) => {
+            setTimeout(() => this.watchTxStack(txStack, transactionStack.length === (ind+1)), 300);
+        })
+    }
+
+    allTransactionsSent () {
+        this.setState({
+            storingToContract: false
+        });
+    }
+
+    watchTxStack (txStack, lastStack) {
+        if (this.props.transactionStack[txStack]) {
+            const tx = this.props.transactionStack[txStack];
+            if (new RegExp(/TEMP.*/).test(tx)) {
+                if (!this.props.transactions[tx]) {
+                    setTimeout(() => this.watchTxStack(txStack, lastStack), 300);
+                } else {
+                    this.watchTransaction(tx);
+                    if (lastStack) {
+                        this.allTransactionsSent();
+                    }
+                }
+            } else {
+                this.watchTransaction(tx);
+                if (lastStack) {
+                    this.allTransactionsSent();
+                }
+            }
+        } else {
+            setTimeout(() => this.watchTxStack(txStack, lastStack), 300);
+        }
+    }
+
+    watchTransaction (tx, lastStatus) {
+        if (this.props.transactions[tx]) {
+            const transaction = this.props.transactions[tx];
+            if (transaction.status === 'error') {
+                notification['error']({
+                    message: 'Transaction failed',
+                    description: transaction.error.message || transaction.error
+                });
+            } else if (transaction.status === 'pending') {
+                if (lastStatus !== 'pending') {
+                    notification['success']({
+                        message: 'Transaction sent',
+                        description: tx
+                    });
+                }
+                setTimeout(() => this.watchTransaction(tx, 'pending'), 300);
+            } else if (transaction.status === 'success') {
+                notification['success']({
+                    message: 'Transaction confirmed',
+                    description: `HASH: ${tx}, BLOCK: ${transaction.receipt.blockNumber}`
+                });
+                this.loadBeneficiaries();
+            }
+        } else {
+            setTimeout(() => this.watchTransaction(tx), 300);
+        }
+    }
+
+    updateBeneficiariesFromContract () {
+        const contractBeneficiaries = this.state.contractBeneficiaries;
+        const beneficiaries = this.state.beneficiaries || [];
+        const dispositions = this.state.dispositions || [];
+
+        contractBeneficiaries.map((beneficiary, index) => {
+            if (beneficiaries.includes(beneficiary.address)) {
+                const pos = beneficiaries.indexOf(beneficiary.address);
+                // delete(beneficiaries[pos])
+                // delete(dispositions[pos])
+                beneficiaries.splice(pos, 1);
+                dispositions.splice(pos, 1);
+            }
+            beneficiaries.splice(index, 0, beneficiary.address);
+            dispositions.splice(index, 0, beneficiary.disposition);
+        });
+
+        for (let b=beneficiaries.length-1; b>0; b--) {
+            if (!beneficiaries[b]) {
+                beneficiaries.splice(b, 1);
+                dispositions.splice(b, 1);
+            }
+        }
+
+        this.setState({
+            beneficiaries,
+            dispositions
+        });
     }
 
     fetchBeneficiaryDisposition (beneficiary) {
-        const index = this.state.beneficiaries.findIndex(beneficiary);
+        const index = this.state.beneficiaries.findIndex(one => one === beneficiary);
         return this.state.dispositions[index];
     }
 
@@ -174,28 +280,39 @@ class Beneficiaries extends Component {
         if (!web3Scripts.isValidAddress(this.props.drizzle.web3 ,this.state.beneficiaries[index])) {
             return false;
         }
-        return !this.state.beneficiaries.some((one, oneIndex) => one === this.state.beneficiaries[index] && index === oneIndex);
+        return !this.state.beneficiaries.some((one, oneIndex) => one === this.state.beneficiaries[index] && index !== oneIndex);
+    }
+
+    validateDisposition (index) {
+        const reg = new RegExp(/\d+/);
+        return reg.test(this.state.dispositions[index]) && Number(this.state.dispositions[index]) > 0;
     }
 
     addBeneficiary () {
-        this.setState({
-            beneficiaries: this.state.beneficiaries.concat(['']),
-            dispositions: this.state.dispositions.concat([''])
-        })
+        if (!this.state.beneficiaries.includes('')) {
+            this.setState({
+                beneficiaries: this.state.beneficiaries.concat(['']),
+                dispositions: this.state.dispositions.concat([''])
+            });
+        }
     }
 
-    validateStatus = (field, index) => (e) => {
-        // console.log(arguments)
+    validateStatus (field, index) {
         if (field === 'beneficiaries') {
             return this.validateBeneficiary(index) ? 'success' : 'error';
+        } else if (field === 'dispositions') {
+            return this.validateDisposition(index) ? 'success' : 'error';
         }
     }
 
     removeBeneficiary = (index) => () => {
         const beneficiaries = this.state.beneficiaries;
         const dispositions = this.state.dispositions;
-        delete(beneficiaries[index]);
-        delete(dispositions[index]);
+        // delete(beneficiaries[index]);
+        // delete(dispositions[index]);
+        beneficiaries.splice(index, 1);
+        dispositions.splice(index, 1);
+
         this.setState({
             beneficiaries,
             dispositions
@@ -214,7 +331,7 @@ class Beneficiaries extends Component {
         await this.loadBeneficiaries ();
     }
 
-    async componentWillUnmount () {
+    componentWillUnmount () {
     }
 
     render () {
@@ -265,12 +382,12 @@ class Beneficiaries extends Component {
                             this.state.beneficiaries.map( (one, index) => 
                                 <Row gutter={16} key={index}>
                                     <Col span={15}>
-                                        <Item hasFeedback={true} validateStatus={this.validateStatus('beneficiaries', index)} required>
+                                        <Item validateStatus={this.state.beneficiaries[index] && this.validateStatus('beneficiaries', index)} required>
                                             <Input onChange={this.handleChange('beneficiaries', index)} value={one} />
                                         </Item>
                                     </Col>
                                     <Col span={3}>
-                                        <Item hasFeedback={true} validateStatus={this.validateStatus('dispositions', index)} required>
+                                        <Item validateStatus={this.state.dispositions[index] && this.validateStatus('dispositions', index)} required>
                                             <Input onChange={this.handleChange('dispositions', index)} type='number' min={1} value={this.state.dispositions[index]} />
                                         </Item>
                                     </Col>
@@ -290,7 +407,7 @@ class Beneficiaries extends Component {
                                 <Button style={{ marginTop: '4px' }} icon='plus-square' disabled={this.state.disbursed} title={FormHelp.addNewBeneficiary} onClick={this.addBeneficiary} />
                             </Col>
                             <Col offset={18} span={4}>
-                                <Button type='primary' style={{ marginTop: '4px' }} icon='upload' disabled={!this.canUpdate} title={FormHelp.updateContract} onClick={this.addBeneficiary} >
+                                <Button type='primary' style={{ marginTop: '4px' }} icon='upload' disabled={!this.canUpdate} title={FormHelp.updateContract} onClick={this.storeToNetwork} >
                                     Save
                                 </Button>
                             </Col>
@@ -329,7 +446,9 @@ Beneficiaries.propTypes = {
     contractAddress: PropTypes.string.isRequired,
     contractBalance: PropTypes.number.isRequired,
     networkId: PropTypes.number.isRequired,
-    selectedAccount: PropTypes.string
+    selectedAccount: PropTypes.string,
+    transactionStack: PropTypes.array,
+    transactions: PropTypes.object
 }
 
 export default ErrorBoundary(NetworkComponent(Beneficiaries));

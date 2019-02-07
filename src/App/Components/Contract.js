@@ -111,7 +111,7 @@ class Contract extends Component {
                 duration: 0,
                 message: 'Failled to load contract',
                 description: err.message || err
-            })
+            });
         }
         this.watchContractBalance();
     }
@@ -211,6 +211,7 @@ class Contract extends Component {
                                     isOwner={ this.isContractOwner }
                                     drizzle={ this.props.drizzle }
                                     transactionStack={this.props.transactionStack}
+                                    transactions={this.props.transactions}
                                 />
                             </div>
                         }
@@ -228,7 +229,8 @@ Contract.propTypes = {
     match: PropTypes.object.isRequired,
     networkId: PropTypes.number,
     selectedAccount: PropTypes.string,
-    transactionStack: PropTypes.array
+    transactionStack: PropTypes.array,
+    transactions: PropTypes.object
 }
 
 export default ErrorBoundary(NetworkComponent(Contract));

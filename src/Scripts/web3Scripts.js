@@ -88,7 +88,7 @@ const web3Scripts = {
                 {
                     contractAddress
                 }
-                )
+            )
         });
     },
     async fetchDeployments (Deployer, network, filter, { onData, onChanged, onError }) {
@@ -130,49 +130,46 @@ const web3Scripts = {
         const receipt = await this.getDeploymentReceipt(drizzle.contracts.Deployer, newtworkId, address);
         const events = this.subscribeEvents(contract, 'allEvents', receipt.blockNumber);
         await new Promise ((resolve, reject) => {
-        this.setupListeners(events, {
+            this.setupListeners(events, {
                 onData: (data) => {
                     this.getBeneficiaryFromEvent(data, beneficiaries);
                     if(beneficiaries.length === totalBeneficiaries-1) {
                         resolve(true);
-            }
+                    }
                 },
                 onError: (err) => {
                     if (err) {
                         reject(err);
                     }
                 }
+            });
         });
-        // const beneficiaries = await contract.methods.beneficiaries().call();
-        // console.log(beneficiaries);
-        return [];
         return beneficiaries;
     },
-    async addBeneficiaries (from, contract, beneficiaries, dispositions) {
-        console.log(arguments);
+    addBeneficiaries (from, contract, beneficiaries, dispositions) {
         if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
-            throw new Error(`Beneficiaries must be at least one and at least ten: ${beneficiaries.length} found`);
+            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
         }
         if (dispositions.length < 1 || dispositions.length > 10) {
-            throw new Error(`Dispositions must be at least one and at least ten: ${dispositions.length} found`);
+            throw new Error(`Dispositions must be at least one and at most ten: ${dispositions.length} found`);
         }
         if  (beneficiaries.length != dispositions.length) {
             throw new Error(`Beneficiaries and Dispositions do not match`);
         }
-        const txHash = contract.methods.updateBeneficiaries.cacheSend(beneficiaries, dispositions, {
+        const txIndex = contract.methods.updateBeneficiaries.cacheSend(beneficiaries, dispositions, {
             from
         });
-        return txHash;
+        return txIndex;
     },
-    async removeBeneficiaries (from, contract, beneficiaries) {
-        console.log(arguments);
+    removeBeneficiaries (from, contract, beneficiaries) {
         if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
-            throw new Error(`Beneficiaries must be at least one and at least ten: ${beneficiaries.length} found`);
+            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
         }
-        const txHash = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
+        const txIndex = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
             from
         });
-        return txHash;
+        console.log(txIndex)
+        return txIndex;
     },
     async loadDrizzleContract (drizzle, address, abi, events) {
         await drizzle.addContract({
@@ -202,17 +199,17 @@ const web3Scripts = {
         if (event.event !== BENEFICIARYEVENT) {
             return ;
         }
-        address = event.returnValues.beneficiary;
-        disposition = event.returnValues.disposition;
+        const address = event.returnValues.beneficiary;
+        const disposition = event.returnValues.disposition;
         const found = store.find(item => item.address === address);
         const foundIndex = store.findIndex(item => item.address === address);
-        if (disposition === 0 && found) {
-            return delete(store[foundIndex]);
+        if (disposition == 0 && found) {
+            return store.splice(foundIndex, 1);
         } else if(found && disposition !== found.disposition) {
-            return store[foundIndex] = disposition;
+            return store[foundIndex].disposition = disposition;
         } else if (!found) {
             store.push({
-                adress,
+                address,
                 disposition
             })
         }
