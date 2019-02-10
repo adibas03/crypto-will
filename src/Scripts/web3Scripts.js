@@ -123,6 +123,23 @@ const web3Scripts = {
         });
         return txIndex;
     },
+    watchTransaction (tx, transactions, { onError, onChanged, onReceipt }, lastStatus) {
+        if (transactions[tx]) {
+            const transaction = transactions[tx];
+            if (transaction.status === 'error') {
+                onError(transaction.error.message || transaction.error);
+            } else if (transaction.status === 'pending') {
+                if (lastStatus !== 'pending') {
+                    onChanged(tx);
+                }
+                setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }, 'pending'), 300);
+            } else if (transaction.status === 'success') {
+                onReceipt(transaction.receipt);
+            }
+        } else {
+            setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }), 300);
+        }
+    },
     truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {
         const tEvent = Contract.events[event]({
             fromBlock,

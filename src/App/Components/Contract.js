@@ -129,7 +129,7 @@ class Contract extends Component {
                     <Postpone />
                 }
                 { this.contractHasBeneficiaries &&
-                    <Beneficiaries />
+                    <Beneficiaries Contract={this.props.drizzle.contracts[this.state.contract.address]} isOwner={this.state.owner === this.props.selectedAccount} />
                 }
             </Layout>
         )

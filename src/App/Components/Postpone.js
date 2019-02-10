@@ -62,17 +62,43 @@ class Postpone extends Component {
     }
 
     canPostpone () {
-        this.props.isOwner;
+        return this.props.isOwner;
     }
 
     async postponeDisbursement (e) {
-        this.setState({ postponing: true });
-        const stack = web3Scripts.postponeDisbursement(this.props.selectedAccount, this.props.Contract);
-        
-        setTimeout(
-            () =>
-            this.setState({ postponing: false }),
-            1000);
+        try {
+            this.setState({ postponing: true });
+            const stack = web3Scripts.postponeDisbursement(this.props.selectedAccount, this.props.Contract);
+            const tx = await web3Scripts.watchTxStack(stack, this.props.transactionStack, this.props.transactions);
+
+            web3Scripts.watchTransaction(tx, this.prop.transactions, {
+                onError: (e) => {
+                    notification['error']({
+                        message: 'Transaction failed',
+                        description: e.message || e
+                    });
+                },
+                onChanged: (tx) => {
+                    notification['success']({
+                        message: 'Transaction sent',
+                        description: tx
+                    });
+                },
+                onReceipt: (receipt) => {
+                    notification['success']({
+                        message: 'Transaction confirmed',
+                        description: `HASH: ${tx}, BLOCK: ${receipt.blockNumber}`
+                    });
+                    this.setState({ postponing: false });
+                }
+            });
+        } catch (e) {
+            notification['error']({
+                message: 'Transaction failed',
+                description: e.message || e
+            });
+
+        }
     }
     
     render () {
