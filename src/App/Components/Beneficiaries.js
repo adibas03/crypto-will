@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 
-import { web3Scripts, CONTRACT_ARRAYs_LENGTH, NULL_ADDRESS } from '../../Scripts';
+import { web3Scripts, CONTRACT_ARRAYs_LENGTH, BENEFICIARY_EVENT, NULL_ADDRESS } from '../../Scripts';
 import { FormHelp } from '../../Config';
 
 import Button from 'antd/lib/button';
@@ -128,7 +128,10 @@ class Beneficiaries extends Component {
             contractBeneficiaries: beneficiaries,
             disbursed: await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]),
             loading: false
-        }, () => { this. updateBeneficiariesFromContract(); });
+        }, () => { 
+            this.updateBeneficiariesFromContract();
+            this.watchForBeneficiaries();
+        });
     }
 
     async storeToNetwork () {
@@ -177,6 +180,34 @@ class Beneficiaries extends Component {
         this.setState({
             storingToContract: false
         });
+    }
+
+    async watchForBeneficiaries () {
+        const contract = this.props.drizzle.contracts[this.props.contractAddress];
+        const fromBlock = await web3Scripts.getBlockNumber(this.props.drizzle.web3);
+        const beneficiaryWatcher = web3Scripts.subscribeEvents(contract, BENEFICIARY_EVENT, fromBlock );
+        web3Scripts.setupListeners( beneficiaryWatcher, {
+            onData: (data) => {
+                const contractBeneficiaries = this.state.contractBeneficiaries;
+                web3Scripts.getBeneficiaryFromEvent(data, contractBeneficiaries);
+
+                this.setState({
+                    contractBeneficiaries
+                }, ()=> {
+                    this.updateBeneficiariesFromContract();
+                })
+            }
+        })
+
+        this.setState({
+            beneficiaryWatcher
+        });
+    }
+
+    async stopBeneficiariesWatcher () {
+        if (this.state.beneficiaryWatcher) {
+            await web3Scripts.unsubscribeEvent(this.state.beneficiaryWatcher);
+        }
     }
 
     watchTxStack (txStack, lastStack) {
@@ -329,7 +360,8 @@ class Beneficiaries extends Component {
         await this.loadBeneficiaries ();
     }
 
-    componentWillUnmount () {
+    async componentWillUnmount () {
+        await this.stopBeneficiariesWatcher();
     }
 
     render () {

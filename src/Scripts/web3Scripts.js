@@ -4,7 +4,7 @@ import Will from '../../build/contracts/Will.json';
 
 const ETHER = 10**18;
 const CONTRACT_ARRAYs_LENGTH = 10;
-const BENEFICIARYEVENT = 'BeneficiaryUpdated';
+const BENEFICIARY_EVENT = 'BeneficiaryUpdated';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const web3Scripts = {
@@ -18,6 +18,10 @@ const web3Scripts = {
                 resolve(res);
             })
         })
+    },
+    async getBlockNumber (web3) {
+        const blockNumber = await web3.eth.getBlockNumber();
+        return blockNumber;
     },
     async getAddressBalance (web3, address) {
         if (!this.isValidAddress(web3, address)) {
@@ -168,7 +172,6 @@ const web3Scripts = {
         const txIndex = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
             from
         });
-        console.log(txIndex)
         return txIndex;
     },
     async loadDrizzleContract (drizzle, address, abi, events) {
@@ -196,7 +199,7 @@ const web3Scripts = {
         });
     },
     getBeneficiaryFromEvent(event, store) {
-        if (event.event !== BENEFICIARYEVENT) {
+        if (event.event !== BENEFICIARY_EVENT) {
             return ;
         }
         const address = event.returnValues.beneficiary;
@@ -306,4 +309,4 @@ const web3Scripts = {
     }
 }
 
-export { web3Scripts, CONTRACT_ARRAYs_LENGTH, NULL_ADDRESS };
+export { web3Scripts, CONTRACT_ARRAYs_LENGTH, BENEFICIARY_EVENT, NULL_ADDRESS };
