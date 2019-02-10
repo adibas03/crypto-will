@@ -96,6 +96,33 @@ const web3Scripts = {
     async unsubscribeEvent (event) {
         return await event.unsubscribe();
     },
+    async watchTxStack (txStack, transactionsStack, transactions) {
+        return new Promise((resolve) => {
+            if (transactionsStack[txStack]) {
+                const tx = transactionsStack[txStack];
+                if (new RegExp(/TEMP.*/).test(tx)) {
+                    if (!transactions[tx]) {
+                        setTimeout(() => resolve(this.watchTxStack(txStack)), 300);
+                    } else {
+                        resolve(tx);
+                    }
+                } else {
+                    resolve(tx);
+                }
+            } else {
+                setTimeout(() => resolve(this.watchTxStack(txStack)), 300);
+            }
+        });
+    },
+    postponeDisbursement (from, contract) {
+        if (!from || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
+            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
+        }
+        const txIndex = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
+            from
+        });
+        return txIndex;
+    },
     truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {
         const tEvent = Contract.events[event]({
             fromBlock,

@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
 import Beneficiaries from "./NetworkComponent";
 import NetworkComponent from "./NetworkComponent";
+import Postpone from "./Postpone";
 
 import { ContractTypes, Explorers } from '../../Config';
 import { web3Scripts } from '../../Scripts';
@@ -124,6 +125,9 @@ class Contract extends Component {
                         </p>
                     </Col>
                 </Row>
+                { this.contractHasBeneficiaries &&
+                    <Postpone />
+                }
                 { this.contractHasBeneficiaries &&
                     <Beneficiaries />
                 }
