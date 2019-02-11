@@ -1,11 +1,23 @@
-import { Networks } from '../Config';
+import { Networks, ContractTypes } from '../Config';
 import Ownable from '../../build/contracts/Ownable.json';
 import Will from '../../build/contracts/Will.json';
+import Wallet from '../../build/contracts/Wallet.json';
+import WillWallet from '../../build/contracts/WillWallet.json';
 
 const ETHER = 10**18;
 const CONTRACT_ARRAYs_LENGTH = 10;
 const BENEFICIARY_EVENT = 'BeneficiaryUpdated';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
+const CONTRACT_EVENTS = {
+    Will: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
+    Wallet: ['OwnershipRenounced', 'OwnershipTransferred'],
+    WillWallet: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
+};
+const ARTIFACTS = {
+    Will,
+    Wallet,
+    WillWallet
+};
 
 const web3Scripts = {
     async getNetworkId (web3) {
@@ -123,7 +135,7 @@ const web3Scripts = {
     },
     async fetchBeneficiaries (drizzle, newtworkId, address) {
         if (!drizzle.contracts[address]) {
-            await this.loadDrizzleContract(drizzle, address, Will.abi, ['BeneficiaryUpdated', 'BeneficiarySettled']);
+            await this.loadDrizzleContractWithContractType(drizzle, 'Will', address, CONTRACT_EVENTS.will);
         }
         const contract = drizzle.contracts[address];
         const totalBeneficiaries = await contract.methods.totalBeneficiaries().call();
@@ -174,11 +186,26 @@ const web3Scripts = {
         });
         return txIndex;
     },
-    async loadDrizzleContract (drizzle, address, abi, events) {
+    async loadDrizzleContract (drizzle, address, abi, events = []) {
         await drizzle.addContract({
             contractName: address,
             web3Contract: await new drizzle.web3.eth.Contract(abi, address)
         }, events);
+    },
+    async loadDrizzleContractWithContractType (drizzle, contractType, address, events = []) {
+        if (!drizzle || !drizzle.addContract || !drizzle.web3) {
+            throw new Error('Drizzle not loaded');
+        }
+        if (!contractType || !ContractTypes.some(one => one.toLowerCase() === contractType.toLowerCase())) {
+            throw new Error('Invalid contract type');
+        }
+        if (!address || !this.isValidAddress(drizzle.web3, address)) {
+            throw new Error('Invalid address');
+        }
+        contractType = ContractTypes.find(one => one.toLowerCase() === contractType.toLowerCase());
+        const abi = ARTIFACTS[contractType].abi;
+        events = events.length > 1 ? events : CONTRACT_EVENTS[contractType];
+        await this.loadDrizzleContract(drizzle, address, abi, events);
     },
     // async fetchPastEvents ( Contract, event, fromBlock, filter={}, topics=[]) {
     //     return Contract.getPastEvents(

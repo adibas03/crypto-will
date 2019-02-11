@@ -47,7 +47,6 @@ class Beneficiaries extends Component {
     state = {
         beneficiaries: [''],
         contractBeneficiaries: [],
-        disbursed: false,
         dispositions: [''],
         loading: false,
         storingToContract: false
@@ -106,7 +105,7 @@ class Beneficiaries extends Component {
     }
 
     get canUpdate () {
-        return !this.state.loading && !this.state.storingToContract && !this.state.disbursed && this.shouldUpdate;
+        return !this.state.loading && !this.state.storingToContract && !this.props.disbursed && this.shouldUpdate;
     }
 
     get getTotalRatio () {
@@ -126,7 +125,6 @@ class Beneficiaries extends Component {
         const beneficiaries = await web3Scripts.fetchBeneficiaries(this.props.drizzle, this.props.networkId, this.props.contractAddress);
         this.setState({
             contractBeneficiaries: beneficiaries,
-            disbursed: await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]),
             loading: false
         }, () => { 
             this.updateBeneficiariesFromContract();
@@ -434,7 +432,7 @@ class Beneficiaries extends Component {
                         }
                         <Row>
                             <Col span={2}>
-                                <Button style={{ marginTop: '4px' }} icon='plus-square' disabled={this.state.disbursed} title={FormHelp.addNewBeneficiary} onClick={this.addBeneficiary} />
+                                <Button style={{ marginTop: '4px' }} icon='plus-square' disabled={this.props.disbursed} title={FormHelp.addNewBeneficiary} onClick={this.addBeneficiary} />
                             </Col>
                             <Col offset={18} span={4}>
                                 <Button type='primary' style={{ marginTop: '4px' }} icon='upload' disabled={!this.canUpdate} title={FormHelp.updateContract} onClick={this.storeToNetwork} >
@@ -475,6 +473,7 @@ Beneficiaries.propTypes = {
     isOwner: PropTypes.bool.isRequired,
     contractAddress: PropTypes.string.isRequired,
     contractBalance: PropTypes.number.isRequired,
+    disbursed: PropTypes.bool.isRequired,
     networkId: PropTypes.number.isRequired,
     selectedAccount: PropTypes.string,
     transactionStack: PropTypes.array,

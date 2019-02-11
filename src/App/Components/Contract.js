@@ -92,7 +92,9 @@ class Contract extends Component {
         if (this.state.loadingContracts) {
             return;
         }
-        this.state.loadingContracts = true;
+        this.setState({
+            loadingContracts: true
+        });
         try{
             const { contractAddress } = this.props.match.params;
             this.setState({
@@ -102,7 +104,8 @@ class Contract extends Component {
                     contractType: await this.getContractType(contractAddress),
                     transactionHash: await this.getContractDeploymentHash(contractAddress),
                     balance: await this.getContractBalance(contractAddress),
-                    owner: await this.getContractOwner(contractAddress)
+                    owner: await this.getContractOwner(contractAddress),
+                    disbursed: this.shouldHaveBeneficiaries ? await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]) : false,
                 },
                 loadingContracts: false
             });
@@ -208,6 +211,7 @@ class Contract extends Component {
                                     contractAddress={ this.state.contract.address }
                                     networkId={ this.props.networkId }
                                     contractBalance={ contract.balance }
+                                    disbursed={ this.state.contract.disbursed }
                                     isOwner={ this.isContractOwner }
                                     drizzle={ this.props.drizzle }
                                     transactionStack={this.props.transactionStack}
