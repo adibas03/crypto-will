@@ -126,10 +126,10 @@ class Contract extends Component {
                     </Col>
                 </Row>
                 { this.contractHasBeneficiaries &&
-                    <Postpone />
+                    <Postpone Contract={this.props.drizzle.contracts[this.state.contract.address]} isOwner={this.state.owner === this.props.selectedAccount} />
                 }
                 { this.contractHasBeneficiaries &&
-                    <Beneficiaries Contract={this.props.drizzle.contracts[this.state.contract.address]} isOwner={this.state.owner === this.props.selectedAccount} />
+                    <Beneficiaries />
                 }
             </Layout>
         )
