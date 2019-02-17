@@ -1,4 +1,4 @@
-#Crypto-Will
+# Crypto-Will
 Crypto-Will is a tool to deploy your personal will on the Ethereum blockchain.  
 You can:
   - add beneficiaries,

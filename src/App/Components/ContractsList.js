@@ -57,9 +57,11 @@ class ContractsList extends Component {
         if (!this._mounted) {
             return;
         }
-        this.setState({ activeAccount: this.props.selectedAccount }, () => {
-            this.fetchDeployedContracts();
-        });
+        if (!this.accountLoaded()) {
+            // this.setState({ activeAccount: this.props.selectedAccount }, () => {
+                this.fetchDeployedContracts();
+            // });
+        }
     }
 
     accountLoaded () {
@@ -79,11 +81,17 @@ class ContractsList extends Component {
             return ;
         }
         if (this.state.runningSubscription) {
-            web3Scripts.stopSubscription(this.state.runningSubscription);
+            await web3Scripts.unsubscribeEvent(this.state.runningSubscription);
         }
-        this.setState({ fetchingContracts: true });
+        const selectedAccount = this.props.selectedAccount;
+
+        this.setState({
+            foundContracts: [],
+            fetchingContracts: true,
+            runningSubscription: null
+        });
         try {
-            const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, { creator: this.state.activeAccount }, {
+            const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, { creator: [ selectedAccount ] }, {
                 onData: (event) => {
                     this.props.foundNewContract(event);
                     this.forceUpdate();
@@ -91,13 +99,16 @@ class ContractsList extends Component {
                 onChanged: (event) => console.log('Changed', event)
             });
 
-            this.setState({
-                runningSubscription: fetchSubscription
+            fetchSubscription.then(sub => {
+                this.setState({
+                    activeAccount: selectedAccount,
+                    runningSubscription: sub,
+                    fetchingContracts: false
+                });
             });
-            await fetchSubscription;
-            this.setState({ fetchingContracts: false });
         } catch (e) {
             notification['error']({
+                duration: 0,
                 message: 'Contract List failed to load',
                 description: e.message || e
             });
@@ -119,7 +130,6 @@ class ContractsList extends Component {
                 <Row gutter={0} style={{ margin: '0 0 24px' }}>
                     <Col span={20}>
                         <h2>Deployed Contracts</h2>
-                        <Divider style={{ height: '1px', margin: '0' }} />
                     </Col>
                     <Col span={4}>
                         <Row gutter={0} justify='center'>
@@ -132,6 +142,9 @@ class ContractsList extends Component {
                                 <h3>: { this.state.fetchingContracts ? '...' : this.props.foundContracts.length }</h3>
                             </Col>
                         </Row>
+                    </Col>
+                    <Col span={24} >
+                        <Divider style={{ height: '1px', margin: '0' }} />
                     </Col>
                 </Row>
                 <Layout style={{ overflowY: 'auto', maxHeight: '900px' }}>
@@ -164,7 +177,7 @@ class ContractsList extends Component {
                                     </Row>
                                     <Row>
                                         <Col span={5}>
-                                            <h4>Transaction:</h4>
+                                            <h4>Tx Hash:</h4>
                                         </Col>
                                         <Col span={19} className='word-wrapped'>{ contract.transactionHash }</Col>
                                     </Row>
