@@ -4,6 +4,7 @@ const merge = require('webpack-merge');
 const baseConfig = require('./base');
 
 const settings = merge(baseConfig, {
+  mode: 'development',
   devtool: 'eval-source-map',
   module: {
     rules: [

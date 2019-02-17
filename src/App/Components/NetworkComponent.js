@@ -3,7 +3,7 @@ import React, { Component } from 'react';
 function NetworkComponent (WrappedComonent) {
     return class extends Component {
         render () {
-            if (!this.props.networkId) {
+            if (typeof this.props.networkId === 'undefined') {
                 return (
                     <div>
                         Loading Ethereum Network ...

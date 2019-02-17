@@ -4,6 +4,7 @@ const UglifyJSPlugin = require('uglifyjs-webpack-plugin');
 process.env.BABEL_ENV = 'production';
 
 module.exports = {
+  mode: 'production',
   output: {
     filename: 'drizzle-react-components.js',
     library: 'drizzle-react-components',
