@@ -304,7 +304,7 @@ class Beneficiaries extends Component {
     }
 
     validateBeneficiary (index) {
-        if (!web3Scripts.isValidAddress(this.props.drizzle.web3 ,this.state.beneficiaries[index])) {
+        if (!web3Scripts.isValidAddress(this.props.drizzle.web3 ,this.state.beneficiaries[index]) || this.state.beneficiaries[index].toLowerCase() === this.props.selectedAccount.toLowerCase()) {
             return false;
         }
         return !this.state.beneficiaries.some((one, oneIndex) => one === this.state.beneficiaries[index] && index !== oneIndex);

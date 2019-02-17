@@ -139,7 +139,8 @@ const web3Scripts = {
         }
         const contract = drizzle.contracts[address];
         const totalBeneficiaries = await contract.methods.totalBeneficiaries().call();
-        if (totalBeneficiaries === 1) {
+
+        if (Number(totalBeneficiaries) === 1) {
             return [];
         }
         const beneficiaries = [];
