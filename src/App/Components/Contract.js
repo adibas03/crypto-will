@@ -109,9 +109,11 @@ class Contract extends Component {
                     transactionHash: await this.getContractDeploymentHash(contractAddress),
                     balance: await this.getContractBalance(contractAddress),
                     owner: await this.getContractOwner(contractAddress),
-                    disbursed: this.shouldHaveBeneficiaries ? await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]) : false,
+                    disbursed: false
                 },
                 loadingContracts: false
+            }, () => {
+                this.loadDrizzleContract();
             });
         } catch (err) {
             notification['error']({
@@ -121,6 +123,18 @@ class Contract extends Component {
             });
         }
         this.watchContractBalance();
+    }
+
+    async loadDrizzleContract () {
+        const type = this.state.contract.contractType.toLowerCase().charAt(0).toUpperCase() + this.state.contract.contractType.slice(1);
+        console.log(type)
+        if (!this.props.drizzle.contracts[this.state.contract.address]) {
+            await web3Scripts.loadDrizzleContractWithContractType(this.props.drizzle, type, this.state.contract.address, CONTRACT_EVENTS[type]);
+        }
+        const disbursed = this.shouldHaveBeneficiaries ? await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]) : false;
+        this.setState({
+            contract: {disbursed: disbursed }
+        })
     }
 
     async fetchDeploymentReceipt (contractAddress) {
@@ -208,8 +222,8 @@ class Contract extends Component {
                                 </p>
                             </Col>
                         </Row>
-                        { this.shouldHaveBeneficiaries &&
-                            <Postpone Contract={this.props.drizzle.contracts[this.state.contract.address]} isOwner={this.isContractOwner} />
+                        { this.shouldHaveBeneficiaries && this.props.drizzle.contracts[this.state.contract.address] &&
+                            <Postpone Contract={this.props.drizzle.contracts[this.state.contract.address]} isOwner={this.isContractOwner} disbursed={this.state.contract.disbursed} disbursing={this.state.contract.disbursing} />
                         }
                         { this.shouldHaveBeneficiaries &&
                             <div>

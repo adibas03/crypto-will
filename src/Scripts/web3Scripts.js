@@ -1,18 +1,18 @@
-import { Networks, ContractTypes } from '../Config';
+import { ContractEvents, ContractTypes, Networks, Timers } from '../Config';
 import Ownable from '../../build/contracts/Ownable.json';
 import Will from '../../build/contracts/Will.json';
 import Wallet from '../../build/contracts/Wallet.json';
 import WillWallet from '../../build/contracts/WillWallet.json';
 
+
 const ETHER = 10**18;
 const CONTRACT_ARRAYs_LENGTH = 10;
 const BENEFICIARY_EVENT = 'BeneficiaryUpdated';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-const CONTRACT_EVENTS = {
-    Will: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
-    Wallet: ['OwnershipRenounced', 'OwnershipTransferred'],
-    WillWallet: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
-};
+
+const WATCH_TX_INTERVAL = Timers.watchTxTimeout;
+const CONTRACT_EVENTS = ContractEvents;
+
 const ARTIFACTS = {
     Will,
     Wallet,
@@ -48,10 +48,23 @@ const web3Scripts = {
             })
         })
     },
+    async makeContractCall (Contract, method, ...args) {
+        console.log(Contract)
+        console.log(method)
+        console.log(args)
+        let result;
+        if ( args.length > 0 ) {
+            result = await Contract.methods[method]().call(...args);
+        } else {
+            result = await Contract.methods[method]().call();
+        }
+        console.log(result)
+        return result;
+    },
     async getContractOwner (web3, address) {
         const abi = Ownable.abi;
         const contract = await new web3.eth.Contract(abi, address);
-        const owner = await contract.methods.owner().call();
+        const owner = await this.makeContractCall(contract, 'owner');
         return owner;
     },
     async deployContract ({ Deployer, fromAddress, type, args, onTransactionHash, onReceipt }) {
@@ -128,17 +141,17 @@ const web3Scripts = {
         return receipt;
     },
     async isContractDisbursed (Contract) {
-        return await Contract.methods.disbursed().call();
+        return await this.makeContractCall(Contract, 'disbursed');
     },
     async isContractDisbursing (Contract) {
-        return await Contract.methods.disbursing().call();
+        return await this.makeContractCall(Contract, 'disbursing');
     },
     async fetchBeneficiaries (drizzle, newtworkId, address) {
         if (!drizzle.contracts[address]) {
             await this.loadDrizzleContractWithContractType(drizzle, 'Will', address, CONTRACT_EVENTS.will);
         }
         const contract = drizzle.contracts[address];
-        const totalBeneficiaries = await contract.methods.totalBeneficiaries().call();
+        const totalBeneficiaries = await this.makeContractCall(contract, 'totalBeneficiaries');
 
         if (Number(totalBeneficiaries) === 1) {
             return [];
@@ -262,7 +275,7 @@ const web3Scripts = {
                 const tx = transactionsStack[txStack];
                 if (new RegExp(/TEMP.*/).test(tx)) {
                     if (!transactions[tx]) {
-                        setTimeout(() => resolve(this.watchTxStack(txStack)), 300);
+                        setTimeout(() => resolve(this.watchTxStack(txStack)), WATCH_TX_INTERVAL);
                     } else {
                         resolve(tx);
                     }
@@ -270,7 +283,7 @@ const web3Scripts = {
                     resolve(tx);
                 }
             } else {
-                setTimeout(() => resolve(this.watchTxStack(txStack)), 300);
+                setTimeout(() => resolve(this.watchTxStack(txStack)), WATCH_TX_INTERVAL);
             }
         });
     },
@@ -292,12 +305,12 @@ const web3Scripts = {
                 if (lastStatus !== 'pending') {
                     onChanged(tx);
                 }
-                setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }, 'pending'), 300);
+                setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }, 'pending'), WATCH_TX_INTERVAL);
             } else if (transaction.status === 'success') {
                 onReceipt(transaction.receipt);
             }
         } else {
-            setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }), 300);
+            setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }), WATCH_TX_INTERVAL);
         }
     },
     truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {

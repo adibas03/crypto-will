@@ -51,10 +51,11 @@ class Postpone extends Component {
         this.state = {}
 
         this.postponeDisbursement = this.postponeDisbursement.bind(this);
+        this.loadTimingData();
     }
 
     get dueDate () {
-        return (this.props.lastInteraction + this.props.lastInteraction) * MILLISECONDS; 
+        return (this.state.lastInteraction + this.state.waitTime) * MILLISECONDS; 
     }
 
     humanReadableTime (timestamp) {
@@ -63,6 +64,18 @@ class Postpone extends Component {
 
     canPostpone () {
         return this.props.isOwner;
+    }
+
+    async loadTimingData () {
+        debugger;
+        const disbursing = await web3Scripts.isContractDisbursing(this.props.Contract);
+        const lastInteraction = await web3Scripts.makeContractCall(this.props.Contract, 'lastInteraction');
+        const waitTime = await web3Scripts.makeContractCall(this.props.Contract, 'waitingTime');
+        debugger;
+        this.setState({
+            lastInteraction,
+            waitTime
+        });
     }
 
     async postponeDisbursement (e) {
@@ -123,8 +136,6 @@ Postpone.propTypes = {
     Contract: PropTypes.object,
     disbursed: PropTypes.bool,
     disbursing: PropTypes.bool,
-    lastInteraction: PropTypes.string,
-    waitTime: PropTypes.string,
     transactionStack: PropTypes.array,
     transactions: PropTypes.object
 }
