@@ -5,7 +5,7 @@ import Beneficiaries from "./Beneficiaries";
 import NetworkComponent from "./NetworkComponent";
 import Postpone from "./Postpone";
 
-import { ContractTypes, Explorers,Timers } from '../../Config';
+import { ContractEvents, ContractTypes, Explorers,Timers } from '../../Config';
 import { web3Scripts } from '../../Scripts';
 
 import Col from 'antd/lib/col';
@@ -21,6 +21,8 @@ import 'antd/lib/layout/style';
 import 'antd/lib/notification/style';
 import 'antd/lib/row/style';
 import 'antd/lib/spin/style';
+
+const CONTRACT_EVENTS = ContractEvents;
 
 class Contract extends Component {
     constructor (props) {
@@ -98,6 +100,7 @@ class Contract extends Component {
         });
         try{
             const { contractAddress } = this.props.match.params;
+
             this.setState({
                 contract: {
                     address: contractAddress,

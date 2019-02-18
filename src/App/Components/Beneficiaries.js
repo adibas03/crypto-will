@@ -7,11 +7,9 @@ import { web3Scripts, CONTRACT_ARRAYs_LENGTH, BENEFICIARY_EVENT, NULL_ADDRESS } 
 import { FormHelp } from '../../Config';
 
 import Button from 'antd/lib/button';
-import Card from 'antd/lib/card';
 import Col from 'antd/lib/col';
 import Divider from 'antd/lib/divider';
 import Form from 'antd/lib/form';
-import Icon from 'antd/lib/icon';
 import Input from 'antd/lib/input';
 import Layout from 'antd/lib/layout';
 import notification from 'antd/lib/notification';
