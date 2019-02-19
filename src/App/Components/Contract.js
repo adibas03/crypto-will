@@ -234,7 +234,15 @@ class Contract extends Component {
                             </Col>
                         </Row>
                         { this.shouldHaveBeneficiaries && this.props.drizzle.contracts[this.state.contract.address] &&
-                            <Postpone Contract={this.props.drizzle.contracts[this.state.contract.address]} isOwner={this.isContractOwner} disbursed={this.state.contract.disbursed} disbursing={this.state.contract.disbursing} />
+                            <Postpone
+                                Contract={this.props.drizzle.contracts[this.state.contract.address]}
+                                selectedAccount={this.props.selectedAccount}
+                                isOwner={this.isContractOwner}
+                                disbursed={this.state.contract.disbursed}
+                                disbursing={this.state.contract.disbursing}
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}
+                                />
                         }
                         { this.shouldHaveBeneficiaries &&
                             <div>

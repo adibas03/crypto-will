@@ -284,10 +284,10 @@ const web3Scripts = {
         });
     },
     postponeDisbursement (from, contract) {
-        if (!from || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
-            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
+        if (!from || !this.isValidAddress(contract.web3, from)) {
+            throw new Error(`Sender (From) address is invalid or not set`);
         }
-        const txIndex = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
+        const txIndex = contract.methods.postpone.cacheSend({
             from
         });
         return txIndex;

@@ -61,11 +61,10 @@ class Postpone extends Component {
     humanReadableTime (timestamp, duration = false) {
         timestamp = timestamp || 0;
         return new Date(timestamp * MILLISECONDS).toString();
-
     }
 
     canPostpone () {
-        return this.props.isOwner && !this.props.disbursed && Math.floor(now/1000) > Number(this.state.lastInteraction);
+        return this.props.isOwner && !this.props.disbursed && Math.floor(new Date().getTime()/1000) > Number(this.state.lastInteraction);
     }
 
     async loadTimingData () {
@@ -112,7 +111,7 @@ class Postpone extends Component {
                 message: 'Transaction failed',
                 description: e.message || e
             });
-
+            this.setState({ postponing: false });
         }
     }
     
@@ -123,7 +122,7 @@ class Postpone extends Component {
                     <p>
                         <b>Disburse date:</b> {this.humanReadableTime(this.dueDate)}
                     </p>
-                    <Button type='primary' disabled={!this.canPostpone} loading={this.state.postponing} onClick={this.postponeDisbursement} icon='fast-forward' title={FormHelp.postpone} >
+                    <Button type='primary' disabled={!this.canPostpone()} loading={this.state.postponing} onClick={this.postponeDisbursement} icon='fast-forward' title={FormHelp.postpone} >
                         Postpone Disbursement
                     </Button>
                     <Divider style={{ height: '1px', margin: '0' }} />
@@ -137,6 +136,7 @@ Postpone.propTypes = {
     isOwner: PropTypes.bool,
     Contract: PropTypes.object,
     disbursed: PropTypes.bool,
+    selectedAccount: PropTypes.string,
     transactionStack: PropTypes.array,
     transactions: PropTypes.object
 }
