@@ -55,24 +55,26 @@ class Postpone extends Component {
     }
 
     get dueDate () {
-        return (this.state.lastInteraction + this.state.waitTime) * MILLISECONDS; 
+        return (Number(this.state.lastInteraction) + Number(this.state.waitTime)); 
     }
 
-    humanReadableTime (timestamp) {
+    humanReadableTime (timestamp, duration = false) {
+        timestamp = timestamp || 0;
+        return new Date(timestamp * MILLISECONDS).toString();
 
     }
 
     canPostpone () {
-        return this.props.isOwner;
+        return this.props.isOwner && !this.props.disbursed && Math.floor(now/1000) > Number(this.state.lastInteraction);
     }
 
     async loadTimingData () {
-        debugger;
         const disbursing = await web3Scripts.isContractDisbursing(this.props.Contract);
         const lastInteraction = await web3Scripts.makeContractCall(this.props.Contract, 'lastInteraction');
         const waitTime = await web3Scripts.makeContractCall(this.props.Contract, 'waitingTime');
-        debugger;
+
         this.setState({
+            disbursing,
             lastInteraction,
             waitTime
         });
@@ -119,7 +121,7 @@ class Postpone extends Component {
             <Row>
                 <Col span={24} style={{ margin: '0 0 24px' }}>
                     <p>
-                        <b>Disburse date:</b> {new Date(this.dueDate).toString()}
+                        <b>Disburse date:</b> {this.humanReadableTime(this.dueDate)}
                     </p>
                     <Button type='primary' disabled={!this.canPostpone} loading={this.state.postponing} onClick={this.postponeDisbursement} icon='fast-forward' title={FormHelp.postpone} >
                         Postpone Disbursement
@@ -135,7 +137,6 @@ Postpone.propTypes = {
     isOwner: PropTypes.bool,
     Contract: PropTypes.object,
     disbursed: PropTypes.bool,
-    disbursing: PropTypes.bool,
     transactionStack: PropTypes.array,
     transactions: PropTypes.object
 }

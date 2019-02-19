@@ -49,16 +49,12 @@ const web3Scripts = {
         })
     },
     async makeContractCall (Contract, method, ...args) {
-        console.log(Contract)
-        console.log(method)
-        console.log(args)
         let result;
         if ( args.length > 0 ) {
             result = await Contract.methods[method]().call(...args);
         } else {
             result = await Contract.methods[method]().call();
         }
-        console.log(result)
         return result;
     },
     async getContractOwner (web3, address) {

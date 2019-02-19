@@ -60,6 +60,9 @@ class Contract extends Component {
 
     watchContractBalance () {
         this.stopWatchingBalance();
+        if (!this._mounted) {
+            return;
+        }
         const balanceWatcher = setTimeout(async () => {
             const balance = await this.getContractBalance(this.state.contract.address);
             if (this._mounted && balance !== this.state.contract.balance) {
@@ -88,11 +91,12 @@ class Contract extends Component {
     }
 
     componentWillUnmount () {
+        this._mounted = false;
         this.stopWatchingBalance();
     }
 
     async loadContractData () {
-        if (this.state.loadingContracts) {
+        if (this.state.loadingContracts || !this._mounted) {
             return;
         }
         this.setState({
@@ -114,6 +118,7 @@ class Contract extends Component {
                 loadingContracts: false
             }, () => {
                 this.loadDrizzleContract();
+                this.watchContractBalance();
             });
         } catch (err) {
             notification['error']({
@@ -122,22 +127,27 @@ class Contract extends Component {
                 description: err.message || err
             });
         }
-        this.watchContractBalance();
     }
 
     async loadDrizzleContract () {
+        if (!this._mounted) {
+            return;
+        }
         const type = this.state.contract.contractType.toLowerCase().charAt(0).toUpperCase() + this.state.contract.contractType.slice(1);
-        console.log(type)
         if (!this.props.drizzle.contracts[this.state.contract.address]) {
             await web3Scripts.loadDrizzleContractWithContractType(this.props.drizzle, type, this.state.contract.address, CONTRACT_EVENTS[type]);
         }
-        const disbursed = this.shouldHaveBeneficiaries ? await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]) : false;
+
+        const disbursed = this.shouldHaveBeneficiaries ? await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.state.contract.address]) : false;
         this.setState({
-            contract: {disbursed: disbursed }
+            contract: Object.assign({}, this.state.contract, {disbursed: disbursed })
         })
     }
 
     async fetchDeploymentReceipt (contractAddress) {
+        if (!this._mounted) {
+            return false;
+        }
         if (this.deploymentReceiptExists() || this.state.fetchingReceipt) {
             return true;
         }
@@ -181,6 +191,7 @@ class Contract extends Component {
     }
 
     async componentWillMount () {
+        this._mounted = true;
         await this.loadContractData();
     }
 
