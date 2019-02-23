@@ -1,5 +1,5 @@
 const Timers = {
     balanceTimeout: 5000,
-    watchTxTimeout: 300
+    watchTxTimeout: 500
 };
 export { Timers };

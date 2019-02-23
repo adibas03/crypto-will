@@ -265,24 +265,6 @@ const web3Scripts = {
             return number * ETHER;
         }
     },
-    async watchTxStack (txStack, transactionsStack, transactions) {
-        return new Promise((resolve) => {
-            if (transactionsStack[txStack]) {
-                const tx = transactionsStack[txStack];
-                if (new RegExp(/TEMP.*/).test(tx)) {
-                    if (!transactions[tx]) {
-                        setTimeout(() => resolve(this.watchTxStack(txStack)), WATCH_TX_INTERVAL);
-                    } else {
-                        resolve(tx);
-                    }
-                } else {
-                    resolve(tx);
-                }
-            } else {
-                setTimeout(() => resolve(this.watchTxStack(txStack)), WATCH_TX_INTERVAL);
-            }
-        });
-    },
     postponeDisbursement (from, contract) {
         if (!from || !this.isValidAddress(contract.web3, from)) {
             throw new Error(`Sender (From) address is invalid or not set`);
@@ -291,23 +273,6 @@ const web3Scripts = {
             from
         });
         return txIndex;
-    },
-    watchTransaction (tx, transactions, { onError, onChanged, onReceipt }, lastStatus) {
-        if (transactions[tx]) {
-            const transaction = transactions[tx];
-            if (transaction.status === 'error') {
-                onError(transaction.error.message || transaction.error);
-            } else if (transaction.status === 'pending') {
-                if (lastStatus !== 'pending') {
-                    onChanged(tx);
-                }
-                setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }, 'pending'), WATCH_TX_INTERVAL);
-            } else if (transaction.status === 'success') {
-                onReceipt(transaction.receipt);
-            }
-        } else {
-            setTimeout(() => this.watchTransaction(tx, transactions, { onError, onChanged, onReceipt }), WATCH_TX_INTERVAL);
-        }
     },
     truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {
         const subObject = { fromBlock, filter };

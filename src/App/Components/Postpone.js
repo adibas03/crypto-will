@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import ErrorBoundary from "./ErrorBoundary";
+import DrizzleTxResolver from "./DrizzleTxResolver";
 
 import { FormHelp } from '../../Config';
 import { web3Scripts } from '../../Scripts';
@@ -45,7 +46,7 @@ const timeSpansFactors = {
 
 const MILLISECONDS = 1000;
 
-class Postpone extends Component {
+class Postpone extends DrizzleTxResolver {
     constructor (props) {
         super(props);
         this.state = {}
@@ -83,27 +84,28 @@ class Postpone extends Component {
         try {
             this.setState({ postponing: true });
             const stack = web3Scripts.postponeDisbursement(this.props.selectedAccount, this.props.Contract);
-            const tx = await web3Scripts.watchTxStack(stack, this.props.transactionStack, this.props.transactions);
+            const tx = await this.watchTxStack(stack);
 
-            web3Scripts.watchTransaction(tx, this.prop.transactions, {
+            this.watchTransaction(tx, {
                 onError: (e) => {
                     notification['error']({
                         message: 'Transaction failed',
                         description: e.message || e
                     });
+                    this.setState({ postponing: false });
                 },
-                onChanged: (tx) => {
+                onChanged: (txHash) => {
                     notification['success']({
                         message: 'Transaction sent',
-                        description: tx
+                        description: txHash
                     });
+                    this.setState({ postponing: false });
                 },
                 onReceipt: (receipt) => {
                     notification['success']({
                         message: 'Transaction confirmed',
                         description: `HASH: ${tx}, BLOCK: ${receipt.blockNumber}`
                     });
-                    this.setState({ postponing: false });
                 }
             });
         } catch (e) {
@@ -136,9 +138,7 @@ Postpone.propTypes = {
     isOwner: PropTypes.bool,
     Contract: PropTypes.object,
     disbursed: PropTypes.bool,
-    selectedAccount: PropTypes.string,
-    transactionStack: PropTypes.array,
-    transactions: PropTypes.object
+    selectedAccount: PropTypes.string
 }
 
 export default ErrorBoundary(Postpone);
