@@ -245,19 +245,17 @@ class Contract extends Component {
                                 />
                         }
                         { this.shouldHaveBeneficiaries &&
-                            <div>
-                                <Beneficiaries
-                                    selectedAccount={ this.props.selectedAccount }
-                                    contractAddress={ this.state.contract.address }
-                                    networkId={ this.props.networkId }
-                                    contractBalance={ contract.balance }
-                                    disbursed={ this.state.contract.disbursed }
-                                    isOwner={ this.isContractOwner }
-                                    drizzle={ this.props.drizzle }
-                                    transactionStack={this.props.transactionStack}
-                                    transactions={this.props.transactions}
-                                />
-                            </div>
+                            <Beneficiaries
+                                selectedAccount={ this.props.selectedAccount }
+                                contractAddress={ this.state.contract.address }
+                                networkId={ this.props.networkId }
+                                contractBalance={ contract.balance }
+                                disbursed={ this.state.contract.disbursed }
+                                isOwner={ this.isContractOwner }
+                                drizzle={ this.props.drizzle }
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}
+                            />
                         }
                     </Layout>
                 }

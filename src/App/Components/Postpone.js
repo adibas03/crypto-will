@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import ErrorBoundary from "./ErrorBoundary";
 import DrizzleTxResolver from "./DrizzleTxResolver";
@@ -10,8 +10,6 @@ import Button from 'antd/lib/button';
 import Col from 'antd/lib/col';
 import Divider from 'antd/lib/divider';
 import Form from 'antd/lib/form';
-import Icon from 'antd/lib/icon';
-import Input from 'antd/lib/input';
 import notification from 'antd/lib/notification';
 import Row from 'antd/lib/row';
 import Select from 'antd/lib/select';
