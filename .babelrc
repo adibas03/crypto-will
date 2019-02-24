@@ -1,6 +1,9 @@
 {
     "presets": [
-        "@babel/preset-env",
+        [ "@babel/preset-env", {
+            "forceAllTransforms": true
+          }
+        ],
         "@babel/preset-react"
     ],
     "plugins": [
