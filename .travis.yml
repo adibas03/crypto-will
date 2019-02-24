@@ -13,3 +13,11 @@ script:
   - ganache-cli -i 1002 -l 8000000 > /dev/null &
   - npm run truffle:test
   - npm run truffle:migrate -- --netwotk=development
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  local-dir: "dist"
+  on:
+    branch: "deploy/travis"
