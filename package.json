@@ -1,10 +1,10 @@
 {
   "name": "crypto-will",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Crypto-will Dapp",
   "main": "src/index.js",
   "scripts": {
-    "build": "webpack --config webpack/config.js",
+    "build": "webpack --config webpack/prod-config.js",
     "build-contracts": "sol-merger \"./contracts/*.sol\" ./build",
     "dev": "webpack-dev-server --colors --config webpack/dev-config.js",
     "publish": "webpack --config webpack.prod.js",
