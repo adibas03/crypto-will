@@ -1,18 +1,18 @@
-import { Networks, ContractTypes } from '../Config';
+import { ContractEvents, ContractTypes, Networks, Timers } from '../Config';
 import Ownable from '../../build/contracts/Ownable.json';
 import Will from '../../build/contracts/Will.json';
 import Wallet from '../../build/contracts/Wallet.json';
 import WillWallet from '../../build/contracts/WillWallet.json';
 
+
 const ETHER = 10**18;
 const CONTRACT_ARRAYs_LENGTH = 10;
 const BENEFICIARY_EVENT = 'BeneficiaryUpdated';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
-const CONTRACT_EVENTS = {
-    Will: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
-    Wallet: ['OwnershipRenounced', 'OwnershipTransferred'],
-    WillWallet: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
-};
+
+const WATCH_TX_INTERVAL = Timers.watchTxTimeout;
+const CONTRACT_EVENTS = ContractEvents;
+
 const ARTIFACTS = {
     Will,
     Wallet,
@@ -48,10 +48,19 @@ const web3Scripts = {
             })
         })
     },
+    async makeContractCall (Contract, method, ...args) {
+        let result;
+        if ( args.length > 0 ) {
+            result = await Contract.methods[method]().call(...args);
+        } else {
+            result = await Contract.methods[method]().call();
+        }
+        return result;
+    },
     async getContractOwner (web3, address) {
         const abi = Ownable.abi;
         const contract = await new web3.eth.Contract(abi, address);
-        const owner = await contract.methods.owner().call();
+        const owner = await this.makeContractCall(contract, 'owner');
         return owner;
     },
     async deployContract ({ Deployer, fromAddress, type, args, onTransactionHash, onReceipt }) {
@@ -128,17 +137,17 @@ const web3Scripts = {
         return receipt;
     },
     async isContractDisbursed (Contract) {
-        return await Contract.methods.disbursed().call();
+        return await this.makeContractCall(Contract, 'disbursed');
     },
     async isContractDisbursing (Contract) {
-        return await Contract.methods.disbursing().call();
+        return await this.makeContractCall(Contract, 'disbursing');
     },
     async fetchBeneficiaries (drizzle, newtworkId, address) {
         if (!drizzle.contracts[address]) {
             await this.loadDrizzleContractWithContractType(drizzle, 'Will', address, CONTRACT_EVENTS.will);
         }
         const contract = drizzle.contracts[address];
-        const totalBeneficiaries = await contract.methods.totalBeneficiaries().call();
+        const totalBeneficiaries = await this.makeContractCall(contract, 'totalBeneficiaries');
 
         if (Number(totalBeneficiaries) === 1) {
             return [];
@@ -255,6 +264,15 @@ const web3Scripts = {
         } else {
             return number * ETHER;
         }
+    },
+    postponeDisbursement (from, contract) {
+        if (!from || !this.isValidAddress(contract.web3, from)) {
+            throw new Error(`Sender (From) address is invalid or not set`);
+        }
+        const txIndex = contract.methods.postpone.cacheSend({
+            from
+        });
+        return txIndex;
     },
     truffleSubscribeOnceEvent (Contract, event, fromBlock, onData, filter={}, topics=[]) {
         const subObject = { fromBlock, filter };

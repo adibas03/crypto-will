@@ -14,6 +14,7 @@ const FormHelp = {
     newBeneficiaryDisposition: 'The desired portion to allocate to the address',
     newBeneficiaryDispositionPercentage: 'The desired percentage of the Will to allocate to the address',
     newBeneficiaryDispositionValue: 'The actual value based on the present contract balance',
+    postpone: 'Push disbursement time forward by another cycle',
     updateContract: 'Store changes to contract'
 };
 

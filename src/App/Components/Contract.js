@@ -3,8 +3,9 @@ import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
 import Beneficiaries from "./Beneficiaries";
 import NetworkComponent from "./NetworkComponent";
+import Postpone from "./Postpone";
 
-import { ContractTypes, Explorers,Timers } from '../../Config';
+import { ContractEvents, ContractTypes, Explorers,Timers } from '../../Config';
 import { web3Scripts } from '../../Scripts';
 
 import Col from 'antd/lib/col';
@@ -20,6 +21,8 @@ import 'antd/lib/layout/style';
 import 'antd/lib/notification/style';
 import 'antd/lib/row/style';
 import 'antd/lib/spin/style';
+
+const CONTRACT_EVENTS = ContractEvents;
 
 class Contract extends Component {
     constructor (props) {
@@ -57,6 +60,9 @@ class Contract extends Component {
 
     watchContractBalance () {
         this.stopWatchingBalance();
+        if (!this._mounted) {
+            return;
+        }
         const balanceWatcher = setTimeout(async () => {
             const balance = await this.getContractBalance(this.state.contract.address);
             if (this._mounted && balance !== this.state.contract.balance) {
@@ -85,11 +91,12 @@ class Contract extends Component {
     }
 
     componentWillUnmount () {
+        this._mounted = false;
         this.stopWatchingBalance();
     }
 
     async loadContractData () {
-        if (this.state.loadingContracts) {
+        if (this.state.loadingContracts || !this._mounted) {
             return;
         }
         this.setState({
@@ -97,6 +104,7 @@ class Contract extends Component {
         });
         try{
             const { contractAddress } = this.props.match.params;
+
             this.setState({
                 contract: {
                     address: contractAddress,
@@ -105,9 +113,12 @@ class Contract extends Component {
                     transactionHash: await this.getContractDeploymentHash(contractAddress),
                     balance: await this.getContractBalance(contractAddress),
                     owner: await this.getContractOwner(contractAddress),
-                    disbursed: this.shouldHaveBeneficiaries ? await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.props.contractAddress]) : false,
+                    disbursed: false
                 },
                 loadingContracts: false
+            }, () => {
+                this.loadDrizzleContract();
+                this.watchContractBalance();
             });
         } catch (err) {
             notification['error']({
@@ -116,10 +127,27 @@ class Contract extends Component {
                 description: err.message || err
             });
         }
-        this.watchContractBalance();
+    }
+
+    async loadDrizzleContract () {
+        if (!this._mounted) {
+            return;
+        }
+        const type = this.state.contract.contractType.toLowerCase().charAt(0).toUpperCase() + this.state.contract.contractType.slice(1);
+        if (!this.props.drizzle.contracts[this.state.contract.address]) {
+            await web3Scripts.loadDrizzleContractWithContractType(this.props.drizzle, type, this.state.contract.address, CONTRACT_EVENTS[type]);
+        }
+
+        const disbursed = this.shouldHaveBeneficiaries ? await web3Scripts.isContractDisbursed(this.props.drizzle.contracts[this.state.contract.address]) : false;
+        this.setState({
+            contract: Object.assign({}, this.state.contract, {disbursed: disbursed })
+        })
     }
 
     async fetchDeploymentReceipt (contractAddress) {
+        if (!this._mounted) {
+            return false;
+        }
         if (this.deploymentReceiptExists() || this.state.fetchingReceipt) {
             return true;
         }
@@ -163,6 +191,7 @@ class Contract extends Component {
     }
 
     async componentWillMount () {
+        this._mounted = true;
         await this.loadContractData();
     }
 
@@ -204,20 +233,29 @@ class Contract extends Component {
                                 </p>
                             </Col>
                         </Row>
-                        { this.shouldHaveBeneficiaries &&
-                            <div>
-                                <Beneficiaries
-                                    selectedAccount={ this.props.selectedAccount }
-                                    contractAddress={ this.state.contract.address }
-                                    networkId={ this.props.networkId }
-                                    contractBalance={ contract.balance }
-                                    disbursed={ this.state.contract.disbursed }
-                                    isOwner={ this.isContractOwner }
-                                    drizzle={ this.props.drizzle }
-                                    transactionStack={this.props.transactionStack}
-                                    transactions={this.props.transactions}
+                        { this.shouldHaveBeneficiaries && this.props.drizzle.contracts[this.state.contract.address] &&
+                            <Postpone
+                                Contract={this.props.drizzle.contracts[this.state.contract.address]}
+                                selectedAccount={this.props.selectedAccount}
+                                isOwner={this.isContractOwner}
+                                disbursed={this.state.contract.disbursed}
+                                disbursing={this.state.contract.disbursing}
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}
                                 />
-                            </div>
+                        }
+                        { this.shouldHaveBeneficiaries &&
+                            <Beneficiaries
+                                selectedAccount={ this.props.selectedAccount }
+                                contractAddress={ this.state.contract.address }
+                                networkId={ this.props.networkId }
+                                contractBalance={ contract.balance }
+                                disbursed={ this.state.contract.disbursed }
+                                isOwner={ this.isContractOwner }
+                                drizzle={ this.props.drizzle }
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}
+                            />
                         }
                     </Layout>
                 }

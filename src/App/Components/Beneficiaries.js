@@ -2,16 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from "prop-types";
 import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
+import DrizzleTxResolver from "./DrizzleTxResolver";
 
 import { web3Scripts, CONTRACT_ARRAYs_LENGTH, BENEFICIARY_EVENT, NULL_ADDRESS } from '../../Scripts';
 import { FormHelp } from '../../Config';
 
 import Button from 'antd/lib/button';
-import Card from 'antd/lib/card';
 import Col from 'antd/lib/col';
 import Divider from 'antd/lib/divider';
 import Form from 'antd/lib/form';
-import Icon from 'antd/lib/icon';
 import Input from 'antd/lib/input';
 import Layout from 'antd/lib/layout';
 import notification from 'antd/lib/notification';
@@ -31,7 +30,7 @@ import 'antd/lib/spin/style';
 
 const { Item } = Form;
 
-class Beneficiaries extends Component {
+class Beneficiaries extends DrizzleTxResolver {
 
     constructor (props) {
         super(props);
@@ -39,6 +38,7 @@ class Beneficiaries extends Component {
         this.addBeneficiary = this.addBeneficiary.bind(this);
         this.removeBeneficiary = this.removeBeneficiary.bind(this);
         this.calcValue = this.calcValue.bind(this);
+        this.loadBeneficiaries = this.loadBeneficiaries.bind(this);
         this.storeToNetwork = this.storeToNetwork.bind(this);
         this.validateStatus = this.validateStatus.bind(this);
         this.validateBeneficiary = this.validateBeneficiary.bind(this);
@@ -170,8 +170,37 @@ class Beneficiaries extends Component {
 
     async resolveTransactions (transactionStack) {
         transactionStack.forEach((txStack, ind) => {
-            setTimeout(() => this.watchTxStack(txStack, transactionStack.length === (ind+1)), 300);
+            setTimeout(() => this.watchTxsStack(txStack, transactionStack.length === (ind+1)), 300);
         })
+    }
+
+    async watchTxsStack (txStack, lastStack) {
+        const tx = await this.watchTxStack(txStack);
+        if (lastStack) {
+            this.allTransactionsSent();
+        }
+
+        this.watchTransaction(tx, {
+            onError: (e) => {
+                notification['error']({
+                    message: 'Transaction failed',
+                    description: e.message || e
+                });
+            },
+            onChanged: (txHash) => {
+                notification['success']({
+                    message: 'Transaction sent',
+                    description: txHash
+                });
+            },
+            onReceipt: (receipt) => {
+                notification['success']({
+                    message: 'Transaction confirmed',
+                    description: `HASH: ${tx}, BLOCK: ${receipt.blockNumber}`
+                });
+                this.loadBeneficiaries();
+            }
+        });
     }
 
     allTransactionsSent () {
@@ -205,57 +234,6 @@ class Beneficiaries extends Component {
     async stopBeneficiariesWatcher () {
         if (this.state.beneficiaryWatcher) {
             await web3Scripts.unsubscribeEvent(this.state.beneficiaryWatcher);
-        }
-    }
-
-    watchTxStack (txStack, lastStack) {
-        if (this.props.transactionStack[txStack]) {
-            const tx = this.props.transactionStack[txStack];
-            if (new RegExp(/TEMP.*/).test(tx)) {
-                if (!this.props.transactions[tx]) {
-                    setTimeout(() => this.watchTxStack(txStack, lastStack), 300);
-                } else {
-                    this.watchTransaction(tx);
-                    if (lastStack) {
-                        this.allTransactionsSent();
-                    }
-                }
-            } else {
-                this.watchTransaction(tx);
-                if (lastStack) {
-                    this.allTransactionsSent();
-                }
-            }
-        } else {
-            setTimeout(() => this.watchTxStack(txStack, lastStack), 300);
-        }
-    }
-
-    watchTransaction (tx, lastStatus) {
-        if (this.props.transactions[tx]) {
-            const transaction = this.props.transactions[tx];
-            if (transaction.status === 'error') {
-                notification['error']({
-                    message: 'Transaction failed',
-                    description: transaction.error.message || transaction.error
-                });
-            } else if (transaction.status === 'pending') {
-                if (lastStatus !== 'pending') {
-                    notification['success']({
-                        message: 'Transaction sent',
-                        description: tx
-                    });
-                }
-                setTimeout(() => this.watchTransaction(tx, 'pending'), 300);
-            } else if (transaction.status === 'success') {
-                notification['success']({
-                    message: 'Transaction confirmed',
-                    description: `HASH: ${tx}, BLOCK: ${transaction.receipt.blockNumber}`
-                });
-                this.loadBeneficiaries();
-            }
-        } else {
-            setTimeout(() => this.watchTransaction(tx), 300);
         }
     }
 
@@ -359,6 +337,7 @@ class Beneficiaries extends Component {
     }
 
     async componentWillUnmount () {
+        super.componentWillUnmount();
         await this.stopBeneficiariesWatcher();
     }
 
