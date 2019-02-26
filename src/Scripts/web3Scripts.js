@@ -10,7 +10,6 @@ const CONTRACT_ARRAYs_LENGTH = 10;
 const BENEFICIARY_EVENT = 'BeneficiaryUpdated';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-const WATCH_TX_INTERVAL = Timers.watchTxTimeout;
 const CONTRACT_EVENTS = ContractEvents;
 
 const ARTIFACTS = {
