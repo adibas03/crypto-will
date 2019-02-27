@@ -17,7 +17,7 @@ import notification from 'antd/lib/notification';
 import Row from 'antd/lib/row';
 import Spin from 'antd/lib/spin';
 
-import 'antd/lib/card/style';
+import 'antd/lib/button/style';
 import 'antd/lib/col/style';
 import 'antd/lib/divider/style';
 import 'antd/lib/form/style';
