@@ -16,7 +16,7 @@ const FormHelp = {
     newBeneficiaryDispositionValue: 'The actual value based on the present contract balance',
     postpone: 'Push disbursement time forward by another cycle',
     recipientAddress: 'Address of the reciever',
-    recipientValue: 'Amount to send to the reciever',
+    recipientValue: 'Amount to send to the reciever in Ether',
     updateContract: 'Store changes to contract'
 };
 

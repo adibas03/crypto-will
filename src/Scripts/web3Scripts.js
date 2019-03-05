@@ -56,6 +56,12 @@ const web3Scripts = {
         }
         return result;
     },
+    async sendTransaction (Contract, method, { from, gas, gasLimit, value }={}, ...args) {
+        const txConfig = this.extractTxConfig({ from, gas, gasLimit, value });
+        debugger;
+        const txIndex = Contract.methods[method].cacheSend( ...args, txConfig);
+        return txIndex;
+    },
     async getContractOwner (web3, address) {
         const abi = Ownable.abi;
         const contract = await new web3.eth.Contract(abi, address);
@@ -170,6 +176,15 @@ const web3Scripts = {
             });
         });
         return beneficiaries;
+    },
+    extractTxConfig ({ from, gas, gasLimit, value, data }) {
+        const txConfig = {};
+        from ? txConfig.from = from : '';
+        gas ? txConfig.gas = gas : '';
+        gasLimit ? txConfig.gasLimit = gasLimit : '';
+        value ? txConfig.value = value : '';
+        data ? txConfig.data = data : '';
+        return txConfig;
     },
     addBeneficiaries (from, contract, beneficiaries, dispositions) {
         if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {

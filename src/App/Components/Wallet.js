@@ -37,7 +37,8 @@ class Wallet extends DrizzleTxResolver {
     constructor (props) {
         super(props);
         this.state = {
-            formValidations: []
+            address: '',
+            amount: ''
         };
 
         this.sendTransaction = this.sendTransaction.bind(this);
@@ -61,17 +62,22 @@ class Wallet extends DrizzleTxResolver {
         this.setState({ [field]: typeof e === 'string' ? e : e.target.value });
     }
 
+    validateAddress (address) {
+        return web3Scripts.isValidAddress(this.props.Contract.web3, address);
+    }
+
     validateStatus (field) {
-        if (this.state[field]) {
-            return this.validateField(field) ? 'success' : 'error';
-        } else {
-            return '';
+        if (!this.state[field]) return 'success';
+        if (field === 'address') {
+            return this.validateAddress(this.state[field]) ? 'success' : 'error';
+        } else if (field === 'amount') {
+            return Number(this.state[field]) > 0 && this.props.contractBalance > web3Scripts.parseEtherValue(this.state[field]) ? 'success' : 'error';
         }
     }
 
     validateForm () {
-        return Object.keys(this.state.formValidations).every( val => {
-           return this.state.formValidations[val] === true;
+        return Object.keys(this.state).every( val => {
+           return this.state[val] && this.validateStatus(val) === 'success';
         });
     }
 
@@ -91,7 +97,7 @@ class Wallet extends DrizzleTxResolver {
         e.preventDefault();
         try {
             this.setState({ sendingTx: true });
-            const stack = web3Scripts.sendTransaction(this.props.selectedAccount, this.props.Contract);
+            const stack = web3Scripts.sendTransaction(this.props.Contract, 'transfer', { from: this.props.selectedAccount }, this.state.address, web3Scripts.parseEtherValue(this.state.amount));
             const tx = await this.watchTxStack(stack);
 
             this.watchTransaction(tx, {
@@ -135,19 +141,19 @@ class Wallet extends DrizzleTxResolver {
                 <Form onSubmit={this.sendTransaction} style={{ margin: '0 0 12x' }}>
                     <Row gutter={16} >
                         <Col span={17}>
-                            <Item label='Address' help={FormHelp.recipientAddress} hasFeedback={true} validateStatus={this.validateStatus('address')} required>
+                            <Item label='Address' help={FormHelp.recipientAddress} validateStatus={this.validateStatus('address')} required>
                                 <Input onChange={this.handleChange('address')} value={this.state.address} />
                             </Item>
                         </Col>
                         <Col span={7}>
-                            <Item label='Amount' help={FormHelp.recipientValue} hasFeedback={true} validateStatus={this.validateStatus('amount')} required>
-                                <Input onChange={this.handleChange('amount')} value={this.state.address} />
+                            <Item label='Amount' help={FormHelp.recipientValue} validateStatus={this.validateStatus('amount')} required>
+                                <Input onChange={this.handleChange('amount')} value={this.state.amount} />
                             </Item>
                         </Col>
                     </Row>
                     <Row >
-                        <Col offset={18} span={4}>
-                            <Button type='primary' htmlType='submit' icon='export' loading={this.state.sendingTx} disabled={!this.props.selectedAccount || !this.validateForm() || this.state.deploying} >
+                        <Col offset={20} span={4}>
+                            <Button type='primary' htmlType='submit' icon='export' loading={this.state.sendingTx} disabled={!this.props.selectedAccount || !this.validateForm() || this.state.sendingTx} >
                                 Send {this.state.value}
                             </Button>
                         </Col>
@@ -161,7 +167,8 @@ class Wallet extends DrizzleTxResolver {
 Wallet.propTypes = {
     isOwner: PropTypes.bool,
     Contract: PropTypes.object,
-    selectedAccount: PropTypes.string
+    selectedAccount: PropTypes.string,
+    contractBalance: PropTypes.number.isRequired
 }
 
 export default ErrorBoundary(Wallet);
