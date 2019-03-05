@@ -77,7 +77,7 @@ class App extends Component {
   }
 
   updateSelectedAccount (event) {
-    if (this._mounted) {
+    if (this._mounted && this.state.selectedAccount !== event.key) {
       this.setState({ selectedAccount: event.key, ContractsList: [] }, () => {
         this.accountUpdated(this.state.selectedAccount);
       });
@@ -86,7 +86,12 @@ class App extends Component {
 
   foundContractAddress (deployLog) {
     if (this._mounted) {
-      this.state.ContractsList.push(deployLog);
+
+      //Object comparison hack
+      const found = this.state.ContractsList.some(contract => JSON.stringify(contract) === JSON.stringify(deployLog));
+      if (!found)  {
+        this.state.ContractsList.push(deployLog);
+      }
     }
   }
 
@@ -125,75 +130,104 @@ class App extends Component {
 
     return (
       <HashRouter basename='/'>
-        <Layout className="App" style={{ minWidth: '576px', maxHeight: '100vh', overflowY: 'hidden' }}>
+        <Layout className="App" style={{ minWidth: '576px', minHeight: '100vh', overflowY: 'hidden' }}>
           { !drizzleStatus.initialized &&
-            <LoadingContainer>
-              <div></div>
-          </LoadingContainer>
-        }
-        { drizzleStatus.initialized &&
-            <Layout>
-              <Content>
-                <Layout style={{ margin: '16px 56px 0' }}>
-                    <Link to='/'>
-                        <h1 className="App-title">Crypto will </h1>
-                    </Link>
+            <div style={{ textAlign: 'center' }}>
+              {!this.state.fetchingNetwork &&
+                <h4>Network might not be supported</h4>
+              }
+              <LoadingContainer>
+                <div></div>
+              </LoadingContainer>
+            </div>
+          }
+          { drizzleStatus.initialized &&
+              <Layout>
+                <Content>
+                  <Layout style={{ margin: '16px 56px 0' }}>
+                    <span>
+                      <Link to='/'>
+                          <h1 className="App-title">Crypto will </h1>
+                      </Link>
+                    </span>
                     <h5>( {this.state.activeNetwork || 'No connected'} network )</h5>
+                  </Layout>
+                  <Layout>
+                    <Accounts {...{ accounts: this.props.accounts, selected: this.state.selectedAccount, selectAccount: this.updateSelectedAccount }} />
                 </Layout>
                 <Layout>
-                  <Accounts {...{ accounts: this.props.accounts, selected: this.state.selectedAccount, selectAccount: this.updateSelectedAccount }} />
-              </Layout>
-              <Layout>
-                <Content className="App-intro" style={{ margin: '0 56px' }}>
-                  <Row style={{ margin: '56px 0' }}>
-                    <Col >
-                      <p>
-                        Crypto Will, is a tool to deploy your personal will on the Ethereum blockchain.<br/>
-                        You can add beneficiaries, delete beneficiaries, set their percentage, also set the Waiting period before the wealth can be disposed.
-                      </p>
-                      <Divider style={{ height: '2.5px', margin: '0' }} />
-                    </Col>
-                  </Row>
-                  { !this.state.selectedAccount &&
-                      <Alert
-                        description="Please select / Unlock an Account/Address to continue."
-                        type="info"
-                        style={{ margin: '24px 0' }}
-                      />
-                    }
-                    <Row >
-                      <Col lg={13} md={24}  >
-                        <Col sm={22} >
-                          <div>
-                            <Switch>
-                              <Redirect exact from='/' to='/deploy'></Redirect>
-                              <Redirect exact from='/contract' to='/deploy'></Redirect>
-                            </Switch>
-                            <Route exact path='/deploy' render= {(props) => <Deployer {...props} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} transactionStack={this.props.transactionStack} transactions={this.props.transactions}/>} ></Route>
-                            <Route exact path='/contract/:contractAddress' render={(props) => <Contract {...props} networkId={this.state.activeNetworkId} selectedAccount={this.state.selectedAccount} drizzle={this.state.drizzle} contractsList={this.state.ContractsList}/>}></Route>
-                          </div>
-                        </Col >
-                      </Col>
-                      <Col lg={1} md={24} >
-                        <Col lg={1} md={0} >
-                            <Divider type='vertical' style={{ width: '2.5px', 'minHeight': '200px', 'marginLeft': '25px' }} />
-                        </Col>
-                        <Col lg={0} md={24} >
-                          <Divider type='horizontal'style={{ height: '2.5px' }} />
-                        </Col>
-                      </Col>
-                      <Col lg={10} md={24} >
-                        <ContractsList networkUpdated={this.callOnNetworkUpdate} networkId={this.state.activeNetworkId} accountUpdated={this.callOnAccountUpdate} selectedAccount={this.state.selectedAccount} DeployerContract={this.state.drizzle.contracts.Deployer} foundNewContract={this.foundContractAddress} foundContracts={this.state.ContractsList} ></ContractsList>
+                  <Content className="App-intro" style={{ margin: '0 56px' }}>
+                    <Row style={{ margin: '56px 0' }}>
+                      <Col >
+                        <p>
+                          Crypto Will, is a tool to deploy your personal will on the Ethereum blockchain.<br/>
+                          You can add beneficiaries, delete beneficiaries, set their percentage, also set the Waiting period before the wealth can be disposed.
+                        </p>
+                        <Divider style={{ height: '2.5px', margin: '0' }} />
                       </Col>
                     </Row>
-                    { JSON.stringify(this.props.drizzleStatus) }
-                    {this.state.selectedAccount}
-                  </Content>
-                </Layout>
-              </Content>
-          </Layout>
-        }
-      </Layout>
+                    { !this.state.selectedAccount &&
+                        <Alert
+                          description="Please select / Unlock an Account/Address to continue."
+                          type="info"
+                          style={{ margin: '24px 0' }}
+                        />
+                      }
+                      <Row >
+                        <Col lg={14} md={24}  >
+                          <Col sm={24} lg={22} >
+                            <div>
+                              <Switch>
+                                <Redirect exact from='/' to='/deploy'></Redirect>
+                                <Redirect exact from='/contract' to='/deploy'></Redirect>
+                              </Switch>
+                              <Route exact path='/deploy'
+                                render= {(props) => <Deployer {...props}
+                                selectedAccount={this.state.selectedAccount}
+                                DeployerContract={this.state.drizzle.contracts.Deployer}
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}/>} >
+                              </Route>
+                              <Route exact path='/contract/:contractAddress'
+                                render={(props) => <Contract {...props}
+                                networkId={this.state.activeNetworkId}
+                                selectedAccount={this.state.selectedAccount}
+                                drizzle={this.state.drizzle}
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}
+                                contractsList={this.state.ContractsList}/>}>
+                              </Route>
+                            </div>
+                          </Col >
+                        </Col>
+                        <Col lg={1} md={24} >
+                          <Col lg={1} xs={0} >
+                              <Divider type='vertical' style={{ 'minHeight': '200px', 'marginLeft': '25px', width: '2.5px' }} />
+                          </Col>
+                          <Col lg={0} md={24} >
+                            <Divider type='horizontal'style={{ height: '2.5px' }} />
+                          </Col>
+                        </Col>
+                        <Col lg={9} md={24} >
+                          <ContractsList
+                            networkUpdated={this.callOnNetworkUpdate}
+                            networkId={this.state.activeNetworkId}
+                            accountUpdated={this.callOnAccountUpdate}
+                            selectedAccount={this.state.selectedAccount}
+                            DeployerContract={this.state.drizzle.contracts.Deployer}
+                            foundNewContract={this.foundContractAddress}
+                            foundContracts={this.state.ContractsList} >
+                          </ContractsList>
+                        </Col>
+                      </Row>
+                      { JSON.stringify(this.props.drizzleStatus) }
+                      {this.state.selectedAccount}
+                    </Content>
+                  </Layout>
+                </Content>
+            </Layout>
+          }
+        </Layout>
       </HashRouter>
     );
   }

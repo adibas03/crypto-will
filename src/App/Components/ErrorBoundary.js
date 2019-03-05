@@ -14,6 +14,7 @@ function ErrorBoundary (WrappedComponent) {
         componentDidCatch (error) {
             this.setState({ hasError: true });
             notification['error']({
+                duration: 0,
                 message: 'Error occurred in component',
                 description: error.message || e
             });
