@@ -262,7 +262,7 @@ class Contract extends Component {
                                 transactions={this.props.transactions}
                                 />
                         }
-                        { this.shouldHaveBeneficiaries &&
+                        { this.shouldHaveBeneficiaries && this.props.drizzle.contracts[this.state.contract.address] &&
                             <Beneficiaries
                                 contractAddress={ this.state.contract.address }
                                 contractBalance={ contract.balance }
