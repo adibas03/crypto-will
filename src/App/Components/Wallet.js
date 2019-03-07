@@ -10,7 +10,7 @@ import Button from 'antd/lib/button';
 import Col from 'antd/lib/col';
 import Divider from 'antd/lib/divider';
 import Form from 'antd/lib/form';
-import Icon from 'antd/lib/input';
+import Icon from 'antd/lib/icon';
 import Input from 'antd/lib/input';
 import Layout from 'antd/lib/layout';
 import notification from 'antd/lib/notification';
@@ -42,7 +42,7 @@ class Wallet extends DrizzleTxResolver {
         };
 
         this.sendTransaction = this.sendTransaction.bind(this);
-        this.loadTimingData();
+        this.sendEntireBalance = this.sendEntireBalance.bind(this);
     }
 
     get dueDate () {
@@ -52,6 +52,12 @@ class Wallet extends DrizzleTxResolver {
     humanReadableTime (timestamp, duration = false) {
         timestamp = timestamp || 0;
         return new Date(timestamp * MILLISECONDS).toString();
+    }
+
+    sendEntireBalance () {
+        this.setState({
+            amount: web3Scripts.parseEtherValue(this.props.contractBalance, true)
+        });
     }
 
     canPostpone () {
@@ -71,7 +77,7 @@ class Wallet extends DrizzleTxResolver {
         if (field === 'address') {
             return this.validateAddress(this.state[field]) ? 'success' : 'error';
         } else if (field === 'amount') {
-            return Number(this.state[field]) > 0 && this.props.contractBalance > web3Scripts.parseEtherValue(this.state[field]) ? 'success' : 'error';
+            return Number(this.state[field]) > 0 && this.props.contractBalance >= web3Scripts.parseEtherValue(this.state[field]) ? 'success' : 'error';
         }
     }
 
@@ -79,18 +85,6 @@ class Wallet extends DrizzleTxResolver {
         return Object.keys(this.state).every( val => {
            return this.state[val] && this.validateStatus(val) === 'success';
         });
-    }
-
-    async loadTimingData () {
-        // const disbursing = await web3Scripts.isContractDisbursing(this.props.Contract);
-        // const lastInteraction = await web3Scripts.makeContractCall(this.props.Contract, 'lastInteraction');
-        // const waitTime = await web3Scripts.makeContractCall(this.props.Contract, 'waitingTime');
-
-        // this.setState({
-        //     disbursing,
-        //     lastInteraction,
-        //     waitTime
-        // });
     }
 
     async sendTransaction (e) {
@@ -139,19 +133,21 @@ class Wallet extends DrizzleTxResolver {
                     <Divider style={{ height: '1px', margin: '0' }} />
                 </Col>
                 <Form onSubmit={this.sendTransaction} style={{ margin: '0 0 12x' }}>
-                    <Row gutter={16} >
+                    <Row gutter={24}>
                         <Col span={17}>
                             <Item label='Address' help={FormHelp.recipientAddress} validateStatus={this.validateStatus('address')} required>
                                 <Input onChange={this.handleChange('address')} value={this.state.address} />
                             </Item>
                         </Col>
-                        <Col span={7}>
+                        <Col span={6}>
                             <Item label='Amount' help={FormHelp.recipientValue} validateStatus={this.validateStatus('amount')} required>
-                                <Input onChange={this.handleChange('amount')} value={this.state.amount} />
+                                <Input onChange={this.handleChange('amount')} value={this.state.amount}
+                                    addonAfter={<Icon onClick={this.sendEntireBalance} style={{ cursor: 'pointer' }} type='wallet' theme='twoTone' title='Send entire balance' />}
+                                />
                             </Item>
                         </Col>
                     </Row>
-                    <Row >
+                    <Row style={{marginTop: '18px'}}>
                         <Col offset={20} span={4}>
                             <Button type='primary' htmlType='submit' icon='export' loading={this.state.sendingTx} disabled={!this.props.selectedAccount || !this.validateForm() || this.state.sendingTx} >
                                 Send {this.state.value}
