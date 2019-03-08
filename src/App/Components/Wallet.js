@@ -12,10 +12,8 @@ import Divider from 'antd/lib/divider';
 import Form from 'antd/lib/form';
 import Icon from 'antd/lib/icon';
 import Input from 'antd/lib/input';
-import Layout from 'antd/lib/layout';
 import notification from 'antd/lib/notification';
 import Row from 'antd/lib/row';
-import Select from 'antd/lib/select';
 
 import 'antd/lib/button/style';
 import 'antd/lib/col/style';
@@ -23,15 +21,10 @@ import 'antd/lib/divider/style';
 import 'antd/lib/form/style';
 import 'antd/lib/icon/style';
 import 'antd/lib/input/style';
-import 'antd/lib/layout/style';
 import 'antd/lib/notification/style';
 import 'antd/lib/row/style';
-import 'antd/lib/select/style';
 
 const { Item } = Form;
-const { Option } = Select;
-
-const MILLISECONDS = 1000;
 
 class Wallet extends DrizzleTxResolver {
     constructor (props) {
@@ -45,23 +38,10 @@ class Wallet extends DrizzleTxResolver {
         this.sendEntireBalance = this.sendEntireBalance.bind(this);
     }
 
-    get dueDate () {
-        return (Number(this.state.lastInteraction) + Number(this.state.waitTime)); 
-    }
-
-    humanReadableTime (timestamp, duration = false) {
-        timestamp = timestamp || 0;
-        return new Date(timestamp * MILLISECONDS).toString();
-    }
-
     sendEntireBalance () {
         this.setState({
             amount: web3Scripts.parseEtherValue(this.props.contractBalance, true)
         });
-    }
-
-    canPostpone () {
-        return this.props.isOwner && !this.props.disbursed && Math.floor(new Date().getTime()/1000) > Number(this.state.lastInteraction);
     }
 
     handleChange = (field) => (e) => {
