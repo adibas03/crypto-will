@@ -213,15 +213,16 @@ class Contract extends Component {
                     </Layout>
                 }
                 { !this.state.loadingContracts &&
-                    <Layout>
+                    <Layout style={{ margin: '0 0 24px' }}>
                         <Row gutter={0} style={{ margin: '0 0 24px' }}>
                             <Col span={24}>
-                                <h2>Contracts details</h2>
-                                <h4 className='word-wrapped'>
-                                    (<a target='_blank' href={`${Explorers[this.props.networkId]}/address/${this.props.match.params.contractAddress}`}>
-                                        { this.props.match.params.contractAddress }
-                                    </a>)
-                                </h4>
+                                <h2>Contracts details {' '}
+                                    <small className='word-wrapped' style={{fontSize: '0.7em'}}>
+                                        (<a target='_blank' href={`${Explorers[this.props.networkId]}/address/${this.props.match.params.contractAddress}`}>
+                                            { this.props.match.params.contractAddress }
+                                        </a>)
+                                    </small>
+                                </h2>
                                 <Divider style={{ height: '1px', margin: '0' }} />
                             </Col>
                         </Row>
@@ -270,6 +271,7 @@ class Contract extends Component {
                                 drizzle={ this.props.drizzle }
                                 isOwner={ this.isContractOwner }
                                 networkId={ this.props.networkId }
+                                closeCollapsable={this.state.contract.contractType.toLowerCase() === 'willwallet'}
                                 selectedAccount={ this.props.selectedAccount }
                                 transactionStack={this.props.transactionStack}
                                 transactions={this.props.transactions}
