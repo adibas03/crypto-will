@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import PropTypes from "prop-types";
+import Collapsable from "./Collapsable";
 import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 import DrizzleTxResolver from "./DrizzleTxResolver";
 
 import { web3Scripts, CONTRACT_ARRAYs_LENGTH, BENEFICIARY_EVENT, NULL_ADDRESS } from '../../Scripts';
-import { FormHelp } from '../../Config';
+import { FormHelp, Timers } from '../../Config';
 
 import Button from 'antd/lib/button';
 import Col from 'antd/lib/col';
@@ -35,6 +36,8 @@ class Beneficiaries extends DrizzleTxResolver {
     constructor (props) {
         super(props);
 
+        this.props.closeCollapsable ? '' : this.state.defaultProps.opened = true;
+
         this.addBeneficiary = this.addBeneficiary.bind(this);
         this.removeBeneficiary = this.removeBeneficiary.bind(this);
         this.calcValue = this.calcValue.bind(this);
@@ -46,6 +49,7 @@ class Beneficiaries extends DrizzleTxResolver {
 
     state = {
         beneficiaries: [''],
+        defaultProps: {},
         contractBeneficiaries: [],
         dispositions: [''],
         loading: false,
@@ -339,85 +343,81 @@ class Beneficiaries extends DrizzleTxResolver {
 
     render () {
         return (
-            <Layout>
-                <Row gutter={0} style={{ margin: '48px 0 24px' }}>
-                    <Col span={24}>
-                        <h3>Benefeciaries</h3>
-                        <Divider style={{ height: '1px', margin: '0' }} />
-                    </Col>
-                </Row>
-                { this.state.loading &&
-                    <Layout>
-                        <Spin size="large" />
-                    </Layout>
-                }
-                { !this.state.loading &&
-                    <Form onSubmit={(e) => e.preventDefault()} >
-                        <Row gutter={16}>
-                            <Col span={15}>
-                                <h5>
-                                    <span title={FormHelp['newBeneficiary']} style={{ cursor: 'help' }}>
-                                        Address
-                                    </span>
-                                </h5>
-                            </Col>
-                            <Col span={3}>
-                                <h5>
-                                    <span title={FormHelp['newBeneficiaryDisposition']} style={{ cursor: 'help' }}>
-                                        Ratio
-                                    </span>
-                                </h5>
-                            </Col>
-                            <Col span={4}>
-                                <h5>
-                                    <span title={FormHelp['newBeneficiaryDispositionValue']} style={{ cursor: 'help' }}>
-                                        Value (Eth)
-                                    </span>
-                                </h5>
-                            </Col>
-                            <Col span={2}>
-                            </Col>
-                            <Col span={24}>
-                                <Divider />
-                            </Col>
-                        </Row>
-                        {
-                            this.state.beneficiaries.map( (one, index) => 
-                                <Row gutter={16} key={index}>
-                                    <Col span={15}>
-                                        <Item validateStatus={this.state.beneficiaries[index] && this.validateStatus('beneficiaries', index)} required>
-                                            <Input onChange={this.handleChange('beneficiaries', index)} value={one} />
-                                        </Item>
-                                    </Col>
-                                    <Col span={3}>
-                                        <Item validateStatus={this.state.dispositions[index] && this.validateStatus('dispositions', index)} required>
-                                            <Input onChange={this.handleChange('dispositions', index)} type='number' min={1} value={this.state.dispositions[index]} />
-                                        </Item>
-                                    </Col>
-                                    <Col span={4}>
-                                        <Item >
-                                            <Input disabled={true} value={ web3Scripts.parseEtherValue(this.calcValue(this.state.dispositions[index]), true) } />
-                                        </Item>
-                                    </Col>
-                                    <Col span={2}>
-                                        <Button style={{ marginTop: '4px' }} icon='minus-square' title={FormHelp.removeBeneficiary} onClick={this.removeBeneficiary(index)} />
-                                    </Col>
-                                </Row>
-                            )
-                        }
-                        <Row>
-                            <Col span={2}>
-                                <Button style={{ marginTop: '4px' }} icon='plus-square' disabled={this.props.disbursed} title={FormHelp.addNewBeneficiary} onClick={this.addBeneficiary} />
-                            </Col>
-                            <Col offset={18} span={4}>
-                                <Button type='primary' style={{ marginTop: '4px' }} icon='upload' disabled={!this.canUpdate} title={FormHelp.updateContract} onClick={this.storeToNetwork} >
-                                    Save
-                                </Button>
-                            </Col>
-                        </Row>
-                    </Form>
-                }
-            </Layout>
+            <Collapsable title={'Benefeciaries'} style={{ margin: '48px 0 12px' }} {...this.state.defaultProps}>
+                <Layout >
+                    { this.state.loading &&
+                        <Layout>
+                            <Spin size="large" />
+                        </Layout>
+                    }
+                    { !this.state.loading &&
+                        <Form onSubmit={(e) => e.preventDefault()} >
+                            <Row gutter={16}>
+                                <Col span={15}>
+                                    <h5>
+                                        <span title={FormHelp['newBeneficiary']} style={{ cursor: 'help' }}>
+                                            Address
+                                        </span>
+                                    </h5>
+                                </Col>
+                                <Col span={3}>
+                                    <h5>
+                                        <span title={FormHelp['newBeneficiaryDisposition']} style={{ cursor: 'help' }}>
+                                            Ratio
+                                        </span>
+                                    </h5>
+                                </Col>
+                                <Col span={4}>
+                                    <h5>
+                                        <span title={FormHelp['newBeneficiaryDispositionValue']} style={{ cursor: 'help' }}>
+                                            Value (Eth)
+                                        </span>
+                                    </h5>
+                                </Col>
+                                <Col span={2}>
+                                </Col>
+                                <Col span={24}>
+                                    <Divider />
+                                </Col>
+                            </Row>
+                            {
+                                this.state.beneficiaries.map( (one, index) => 
+                                    <Row gutter={16} key={index}>
+                                        <Col span={15}>
+                                            <Item validateStatus={this.state.beneficiaries[index] && this.validateStatus('beneficiaries', index)} required>
+                                                <Input onChange={this.handleChange('beneficiaries', index)} value={one} />
+                                            </Item>
+                                        </Col>
+                                        <Col span={3}>
+                                            <Item validateStatus={this.state.dispositions[index] && this.validateStatus('dispositions', index)} required>
+                                                <Input onChange={this.handleChange('dispositions', index)} type='number' min={1} value={this.state.dispositions[index]} />
+                                            </Item>
+                                        </Col>
+                                        <Col span={4}>
+                                            <Item >
+                                                <Input disabled={true} value={ web3Scripts.parseEtherValue(this.calcValue(this.state.dispositions[index]), true) } />
+                                            </Item>
+                                        </Col>
+                                        <Col span={2}>
+                                            <Button style={{ marginTop: '4px' }} icon='minus-square' title={FormHelp.removeBeneficiary} onClick={this.removeBeneficiary(index)} />
+                                        </Col>
+                                    </Row>
+                                )
+                            }
+                            <Row>
+                                <Col span={2}>
+                                    <Button style={{ marginTop: '4px' }} icon='plus-square' disabled={this.props.disbursed} title={FormHelp.addNewBeneficiary} onClick={this.addBeneficiary} />
+                                </Col>
+                                <Col offset={18} span={4}>
+                                    <Button type='primary' style={{ marginTop: '4px' }} icon='upload' disabled={!this.canUpdate} title={FormHelp.updateContract} onClick={this.storeToNetwork} >
+                                        Save
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </Form>
+                    }
+                </Layout >
+            </Collapsable>
         )
     }
 
@@ -430,6 +430,7 @@ Beneficiaries.propTypes = {
     contractBalance: PropTypes.number.isRequired,
     disbursed: PropTypes.bool.isRequired,
     networkId: PropTypes.number.isRequired,
+    closeCollapsable: PropTypes.bool,
     selectedAccount: PropTypes.string,
     transactionStack: PropTypes.array,
     transactions: PropTypes.object

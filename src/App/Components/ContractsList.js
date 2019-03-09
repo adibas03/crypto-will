@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Link, NavLink } from "react-router-dom";
 import PropTypes from "prop-types";
+import Collapsable from "./Collapsable";
 import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 
@@ -126,8 +127,8 @@ class ContractsList extends Component {
     
     render () {
         return (
-            <Layout>
-                <Row gutter={0} style={{ margin: '0 0 24px' }}>
+            <Collapsable opened title={
+                <Row gutter={0} >
                     <Col span={20}>
                         <h2>Deployed Contracts</h2>
                     </Col>
@@ -143,10 +144,8 @@ class ContractsList extends Component {
                             </Col>
                         </Row>
                     </Col>
-                    <Col span={24} >
-                        <Divider style={{ height: '1px', margin: '0' }} />
-                    </Col>
                 </Row>
+            }>
                 <Layout style={{ overflowY: 'auto', maxHeight: '900px' }}>
                     {this.displayList.map( (contract, index) => {
                         return (
@@ -186,8 +185,7 @@ class ContractsList extends Component {
                         );
                     })}
                 </Layout>
-                
-            </Layout>
+            </Collapsable>
         );
     }
 }
