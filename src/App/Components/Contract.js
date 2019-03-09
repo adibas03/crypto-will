@@ -4,6 +4,7 @@ import ErrorBoundary from "./ErrorBoundary";
 import Beneficiaries from "./Beneficiaries";
 import NetworkComponent from "./NetworkComponent";
 import Postpone from "./Postpone";
+import Wallet from "./Wallet";
 
 import { ContractEvents, ContractTypes, Explorers,Timers } from '../../Config';
 import { web3Scripts } from '../../Scripts';
@@ -42,6 +43,13 @@ class Contract extends Component {
 
     get isContractOwner () {
         return (this.state.contract && this.state.contract.owner) === this.props.selectedAccount;
+    }
+
+    get hasWallet () {
+        const isWallet = this.state.contract.contractType ? 
+            [ ContractTypes[1], ContractTypes[2] ].some( type => type.toLowerCase() === this.state.contract.contractType.toLowerCase()) :
+            false;
+        return isWallet;
     }
 
     get shouldHaveBeneficiaries () {
@@ -236,23 +244,33 @@ class Contract extends Component {
                         { this.shouldHaveBeneficiaries && this.props.drizzle.contracts[this.state.contract.address] &&
                             <Postpone
                                 Contract={this.props.drizzle.contracts[this.state.contract.address]}
-                                selectedAccount={this.props.selectedAccount}
-                                isOwner={this.isContractOwner}
                                 disbursed={this.state.contract.disbursed}
                                 disbursing={this.state.contract.disbursing}
+                                isOwner={this.isContractOwner}
+                                selectedAccount={this.props.selectedAccount}
                                 transactionStack={this.props.transactionStack}
                                 transactions={this.props.transactions}
                                 />
                         }
-                        { this.shouldHaveBeneficiaries &&
+                        { this.hasWallet && this.props.drizzle.contracts[this.state.contract.address] &&
+                            <Wallet
+                                Contract={this.props.drizzle.contracts[this.state.contract.address]}
+                                contractBalance={ contract.balance }
+                                isOwner={this.isContractOwner}
+                                selectedAccount={this.props.selectedAccount}
+                                transactionStack={this.props.transactionStack}
+                                transactions={this.props.transactions}
+                                />
+                        }
+                        { this.shouldHaveBeneficiaries && this.props.drizzle.contracts[this.state.contract.address] &&
                             <Beneficiaries
-                                selectedAccount={ this.props.selectedAccount }
                                 contractAddress={ this.state.contract.address }
-                                networkId={ this.props.networkId }
                                 contractBalance={ contract.balance }
                                 disbursed={ this.state.contract.disbursed }
-                                isOwner={ this.isContractOwner }
                                 drizzle={ this.props.drizzle }
+                                isOwner={ this.isContractOwner }
+                                networkId={ this.props.networkId }
+                                selectedAccount={ this.props.selectedAccount }
                                 transactionStack={this.props.transactionStack}
                                 transactions={this.props.transactions}
                             />

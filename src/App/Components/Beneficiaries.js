@@ -17,7 +17,7 @@ import notification from 'antd/lib/notification';
 import Row from 'antd/lib/row';
 import Spin from 'antd/lib/spin';
 
-import 'antd/lib/card/style';
+import 'antd/lib/button/style';
 import 'antd/lib/col/style';
 import 'antd/lib/divider/style';
 import 'antd/lib/form/style';
@@ -245,8 +245,6 @@ class Beneficiaries extends DrizzleTxResolver {
         contractBeneficiaries.map((beneficiary, index) => {
             if (beneficiaries.includes(beneficiary.address)) {
                 const pos = beneficiaries.indexOf(beneficiary.address);
-                // delete(beneficiaries[pos])
-                // delete(dispositions[pos])
                 beneficiaries.splice(pos, 1);
                 dispositions.splice(pos, 1);
             }
@@ -313,8 +311,6 @@ class Beneficiaries extends DrizzleTxResolver {
     removeBeneficiary = (index) => () => {
         const beneficiaries = this.state.beneficiaries;
         const dispositions = this.state.dispositions;
-        // delete(beneficiaries[index]);
-        // delete(dispositions[index]);
         beneficiaries.splice(index, 1);
         dispositions.splice(index, 1);
 
@@ -419,26 +415,6 @@ class Beneficiaries extends DrizzleTxResolver {
                                 </Button>
                             </Col>
                         </Row>
-                        {/* <Row gutter={16}>
-                            <Col span={15}>
-                                <Item hasFeedback={true} validateStatus={this.validateStatus('newBeneficiary')} required>
-                                    <Input onChange={this.handleChange('newBeneficiary')} value={this.state.newBeneficiary} />
-                                </Item>
-                            </Col>
-                            <Col span={3}>
-                                <Item hasFeedback={true} validateStatus={this.validateStatus('newBeneficiaryDisposition')} required>
-                                    <Input onChange={this.handleChange('newBeneficiaryDisposition')} type='number' min={1} value={this.state.newBeneficiaryDisposition} />
-                                </Item>
-                            </Col>
-                            <Col span={4}>
-                                <Item >
-                                    <Input disabled={true} value={ web3Scripts.parseEtherValue(this.calcValue(this.state.newBeneficiaryDisposition), true) } />
-                                </Item>
-                            </Col>
-                            <Col span={2}>
-                                <Button style={{ marginTop: '4px' }} icon='plus-square' disabled={!this.newBeneficiaryCorrect} title={FormHelp.addNewBeneficiary} onClick={this.addBeneficiary()} />
-                            </Col>
-                        </Row> */}
                     </Form>
                 }
             </Layout>
