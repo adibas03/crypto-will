@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import Collapsable from "./Collapsable";
 import ErrorBoundary from "./ErrorBoundary";
 import DrizzleTxResolver from "./DrizzleTxResolver";
 
@@ -8,7 +9,6 @@ import { web3Scripts } from '../../Scripts';
 
 import Button from 'antd/lib/button';
 import Col from 'antd/lib/col';
-import Divider from 'antd/lib/divider';
 import Form from 'antd/lib/form';
 import Icon from 'antd/lib/icon';
 import Input from 'antd/lib/input';
@@ -17,7 +17,6 @@ import Row from 'antd/lib/row';
 
 import 'antd/lib/button/style';
 import 'antd/lib/col/style';
-import 'antd/lib/divider/style';
 import 'antd/lib/form/style';
 import 'antd/lib/icon/style';
 import 'antd/lib/input/style';
@@ -107,11 +106,7 @@ class Wallet extends DrizzleTxResolver {
     
     render () {
         return (
-            <Row style={{ margin: '48px 0 24px' }}>
-                <Col span={24} style={{ margin: '0 0 24px' }}>
-                    <h3>Wallet</h3>
-                    <Divider style={{ height: '1px', margin: '0' }} />
-                </Col>
+            <Collapsable opened title={'Wallet'} style={{ margin: '48px 0 12px' }}>
                 <Form onSubmit={this.sendTransaction} style={{ margin: '0 0 12x' }}>
                     <Row gutter={24}>
                         <Col span={17}>
@@ -135,7 +130,7 @@ class Wallet extends DrizzleTxResolver {
                         </Col>
                     </Row>
                 </Form>
-            </Row>
+            </Collapsable>
         );
     }
 }
