@@ -101,7 +101,6 @@ class Postpone extends DrizzleTxResolver {
                     <Button type='primary' disabled={!this.canPostpone()} loading={this.state.postponing} onClick={this.postponeDisbursement} icon='fast-forward' title={FormHelp.postpone} >
                         Postpone Disbursement
                     </Button>
-                    <Divider style={{ height: '1px', margin: '0' }} />
                 </Col>
             </Row>
         );
