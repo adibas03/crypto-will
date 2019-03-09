@@ -21,7 +21,6 @@ class Collapsable extends Component {
     }
 
     toggleCollapse () {
-        console.log(this.state)
         this.setState({
             collapsed: !this.state.collapsed
         });
