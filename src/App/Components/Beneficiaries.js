@@ -343,7 +343,7 @@ class Beneficiaries extends DrizzleTxResolver {
 
     render () {
         return (
-            <Collapsable title={'Benefeciaries'} style={{ margin: '48px 0 12px' }} {...this.state.defaultProps}>
+            <Collapsable title={'Benefeciaries'} style={{ margin: '24px 0 12px' }} {...this.state.defaultProps}>
                 <Layout >
                     { this.state.loading &&
                         <Layout>

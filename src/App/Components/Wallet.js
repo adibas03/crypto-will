@@ -106,7 +106,7 @@ class Wallet extends DrizzleTxResolver {
 
     render () {
         return (
-            <Collapsable opened title={'Wallet'} style={{ margin: '48px 0 12px' }}>
+            <Collapsable opened title={'Wallet'} style={{ margin: '24px 0 12px' }}>
                 <Form onSubmit={this.sendTransaction} style={{ margin: '0 0 12x' }}>
                     <Row gutter={24}>
                         <Col span={17}>

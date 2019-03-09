@@ -25,7 +25,7 @@ contract ('Wallet', function (accounts) {
     assert.exists(wallet.address, ' Failed to deploy Wallet with address');
   });
 
-  describe('transfer()', function () {
+  describe('transferEth()', function () {
     const transferValue = 1.25 * ETHER;
 
     before(async function () {
@@ -38,9 +38,9 @@ contract ('Wallet', function (accounts) {
       assert.deepEqual(newBalance, balance.plus(transferValue), 'Wrong value transferred to contract');
     });
 
-    it('should fail to transfer from non-priviledged address', async function () {
+    it('should fail to transferEth from non-priviledged address', async function () {
         try {
-          await wallet.transfer(accounts[1], String(transferValue), {
+          await wallet.transferEth(accounts[1], String(transferValue), {
             from: accounts[3]
           });
           assert.fail(true, 'Expected funtion to fail');
@@ -50,9 +50,9 @@ contract ('Wallet', function (accounts) {
         }
     });
 
-    it('should fail to transfer negative value', async function () {
+    it('should fail to transferEth negative value', async function () {
         try {
-          await wallet.transfer(accounts[1], "-1", {
+          await wallet.transferEth(accounts[1], "-1", {
             from: owner
           });
           assert.fail(true, 'Expected funtion to fail');
@@ -62,10 +62,10 @@ contract ('Wallet', function (accounts) {
         }
     });
 
-    it('should successfully transfer funds', async function () {
+    it('should successfully transferEth funds', async function () {
       const acctBalance = await getBalance(accounts[1]);
 
-      await wallet.transfer(accounts[1], String(transferValue), {
+      await wallet.transferEth(accounts[1], String(transferValue), {
         from: owner
       });
 
