@@ -3,5 +3,8 @@ export{ default as Beneficiaries } from './Beneficiaries';
 export{ default as Contract } from './Contract';
 export{ default as ContractsList } from './ContractsList';
 export{ default as Deployer } from './Deployer';
+export{ default as DrizzleTxResolver } from './DrizzleTxResolver';
 export{ default as ErrorBoundary } from './ErrorBoundary';
 export{ default as NetworkComponent } from './NetworkComponent';
+export{ default as Postpone } from './Postpone';
+export{ default as Wallet } from './Wallet';

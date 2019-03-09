@@ -9,38 +9,14 @@ import { web3Scripts } from '../../Scripts';
 import Button from 'antd/lib/button';
 import Col from 'antd/lib/col';
 import Divider from 'antd/lib/divider';
-import Form from 'antd/lib/form';
 import notification from 'antd/lib/notification';
 import Row from 'antd/lib/row';
-import Select from 'antd/lib/select';
 
 import 'antd/lib/button/style';
 import 'antd/lib/col/style';
 import 'antd/lib/divider/style';
-import 'antd/lib/form/style';
-import 'antd/lib/icon/style';
-import 'antd/lib/input/style';
 import 'antd/lib/notification/style';
 import 'antd/lib/row/style';
-import 'antd/lib/select/style';
-
-const { Item } = Form;
-const { Option } = Select;
-
-const timeSpans = [
-    'second',
-    'day',
-    'month',
-    'year'
-];
-
-const timeSpansFactors = {
-    second: 1,
-    day: 86400,
-    month: 2592000,
-    year: 31536000
-
-};
 
 const MILLISECONDS = 1000;
 
