@@ -10,7 +10,6 @@ const CONTRACT_ARRAYs_LENGTH = 10;
 const BENEFICIARY_EVENT = 'BeneficiaryUpdated';
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-const WATCH_TX_INTERVAL = Timers.watchTxTimeout;
 const CONTRACT_EVENTS = ContractEvents;
 
 const ARTIFACTS = {
@@ -172,30 +171,6 @@ const web3Scripts = {
         });
         return beneficiaries;
     },
-    addBeneficiaries (from, contract, beneficiaries, dispositions) {
-        if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
-            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
-        }
-        if (dispositions.length < 1 || dispositions.length > 10) {
-            throw new Error(`Dispositions must be at least one and at most ten: ${dispositions.length} found`);
-        }
-        if  (beneficiaries.length != dispositions.length) {
-            throw new Error(`Beneficiaries and Dispositions do not match`);
-        }
-        const txIndex = contract.methods.updateBeneficiaries.cacheSend(beneficiaries, dispositions, {
-            from
-        });
-        return txIndex;
-    },
-    removeBeneficiaries (from, contract, beneficiaries) {
-        if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
-            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
-        }
-        const txIndex = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
-            from
-        });
-        return txIndex;
-    },
     async loadDrizzleContract (drizzle, address, abi, events = []) {
         await drizzle.addContract({
             contractName: address,
@@ -234,6 +209,44 @@ const web3Scripts = {
                 resolve(success);
             });
         });
+    },
+    extractTxConfig ({ from, gas, gasLimit, value, data }) {
+        const txConfig = {};
+        from ? txConfig.from = from : '';
+        gas ? txConfig.gas = gas : '';
+        gasLimit ? txConfig.gasLimit = gasLimit : '';
+        value ? txConfig.value = value : '';
+        data ? txConfig.data = data : '';
+        return txConfig;
+    },
+    sendTransaction (Contract, method, { from, gas, gasLimit, value }={}, ...args) {
+        const txConfig = this.extractTxConfig({ from, gas, gasLimit, value });
+        const txIndex = Contract.methods[method].cacheSend( ...args, txConfig);
+        return txIndex;
+    },
+    addBeneficiaries (from, contract, beneficiaries, dispositions) {
+        if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
+            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
+        }
+        if (dispositions.length < 1 || dispositions.length > 10) {
+            throw new Error(`Dispositions must be at least one and at most ten: ${dispositions.length} found`);
+        }
+        if  (beneficiaries.length != dispositions.length) {
+            throw new Error(`Beneficiaries and Dispositions do not match`);
+        }
+        const txIndex = contract.methods.updateBeneficiaries.cacheSend(beneficiaries, dispositions, {
+            from
+        });
+        return txIndex;
+    },
+    removeBeneficiaries (from, contract, beneficiaries) {
+        if (beneficiaries.length < 1 || beneficiaries.length > CONTRACT_ARRAYs_LENGTH) {
+            throw new Error(`Beneficiaries must be at least one and at most ten: ${beneficiaries.length} found`);
+        }
+        const txIndex = contract.methods.removeBeneficiaries.cacheSend(beneficiaries, {
+            from
+        });
+        return txIndex;
     },
     getBeneficiaryFromEvent(event, store) {
         if (event.event !== BENEFICIARY_EVENT) {

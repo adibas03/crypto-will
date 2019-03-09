@@ -39,9 +39,6 @@ class DrizzleTxResolver extends Component {
     }
 
     watchTransaction (tx, { onError, onChanged, onReceipt }, lastStatus) {
-        if (!this._mounted) {
-            return;
-        }
         const { transactions } = this.props;
 
         if (transactions[tx] && transactions[tx].status) {
