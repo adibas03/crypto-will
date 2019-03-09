@@ -70,7 +70,7 @@ class Wallet extends DrizzleTxResolver {
         e.preventDefault();
         try {
             this.setState({ sendingTx: true });
-            const stack = web3Scripts.sendTransaction(this.props.Contract, 'transfer', { from: this.props.selectedAccount }, this.state.address, web3Scripts.parseEtherValue(this.state.amount));
+            const stack = web3Scripts.sendTransaction(this.props.Contract, 'transferEth', { from: this.props.selectedAccount }, this.state.address, web3Scripts.parseEtherValue(this.state.amount));
             const tx = await this.watchTxStack(stack);
 
             this.watchTransaction(tx, {
@@ -103,7 +103,7 @@ class Wallet extends DrizzleTxResolver {
             this.setState({ sendingTx: false });
         }
     }
-    
+
     render () {
         return (
             <Collapsable opened title={'Wallet'} style={{ margin: '48px 0 12px' }}>
