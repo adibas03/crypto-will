@@ -3,10 +3,12 @@ import PropTypes from "prop-types";
 
 import Col from 'antd/lib/col';
 import Divider from 'antd/lib/divider';
+import Icon from 'antd/lib/icon';
 import Layout from 'antd/lib/layout';
 
 import 'antd/lib/col/style';
 import 'antd/lib/divider/style';
+import 'antd/lib/icon/style';
 import 'antd/lib/layout/style';
 
 class Collapsable extends Component {
@@ -28,17 +30,21 @@ class Collapsable extends Component {
 
     render () {
         const { title, children, opened, ...others } = this.props;
+        const Title = title;
         return (
             <Layout {...others}>
-                <Col span={24} style={{ cursor: 'pointer', margin: '0 0 12px' }}>
-                    <div onClick={this.toggleCollapse} >
+                <Col onClick={this.toggleCollapse} span={24} style={{ cursor: 'pointer', margin: '0 0 12px' }}>
+                    <div style={{minHeight: '24px'}} >
                         {typeof title === 'string' &&
-                            <h3>
-                                {title}
-                            </h3>
+                                <h3>
+                                    {title} <Icon type={this.state.collapsed ? 'caret-right' : 'caret-down'} style={{marginLeft: '12px', color: 'gray'}}/>
+                                </h3>
                         }
                         {typeof title === 'object' &&
-                            title
+                                {title}
+                        }
+                        {typeof title === 'function' && 
+                            <Title collapsed={this.state.collapsed} toggleCollapse={this.toggleCollapse} />
                         }
                         <Divider style={{ height: '1px', margin: '0' }} />
                     </div>

@@ -25,6 +25,40 @@ import 'antd/lib/row/style';
 
 import { Explorers } from "../../Config";
 
+class Title extends Component {
+    static props = {
+        collapsed: PropTypes.bool,
+        fetchingContracts: PropTypes.bool,
+        foundContracts: PropTypes.number,
+        toggleCollapse: PropTypes.func.isRequired
+    }
+    render () {
+        return (
+            <Row gutter={0} >
+                <Col span={20} onClick={this.props.toggleCollapse}>
+                    <h2>
+                        Deployed Contracts
+                        <Icon type={this.props.collapsed ? 'caret-right' : 'caret-down'} style={{marginLeft: '12px', color: 'gray'}}/>
+                    </h2>
+                </Col>
+                <Col span={4}>
+                    <Row gutter={0} justify='center'>
+                        <Col span={11} >
+                            <NavLink to='/deploy' title='New contract' >
+                                <Icon type='plus-square' style={{ fontSize: '28px' }} />
+                            </NavLink>
+                        </Col>
+                        <Col span={11} >
+                            <h3>: { this.props.fetchingContracts ? '...' : this.props.foundContracts }</h3>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
+        )
+    }
+}
+
+
 class ContractsList extends Component {
     state = {
         activeAccount: '',
@@ -127,24 +161,8 @@ class ContractsList extends Component {
     
     render () {
         return (
-            <Collapsable opened title={
-                <Row gutter={0} >
-                    <Col span={20}>
-                        <h2>Deployed Contracts</h2>
-                    </Col>
-                    <Col span={4}>
-                        <Row gutter={0} justify='center'>
-                            <Col span={11} >
-                                <NavLink to='/deploy' title='New contract' >
-                                    <Icon type='plus-square' style={{ fontSize: '28px' }} />
-                                </NavLink>
-                            </Col>
-                            <Col span={11} >
-                                <h3>: { this.state.fetchingContracts ? '...' : this.props.foundContracts.length }</h3>
-                            </Col>
-                        </Row>
-                    </Col>
-                </Row>
+            <Collapsable opened title={ (props) => 
+                    <Title fetchingContracts={this.state.fetchingContracts} foundContracts={this.props.foundContracts.length} {...props} />
             }>
                 <Layout style={{ overflowY: 'auto', maxHeight: '900px' }}>
                     {this.displayList.map( (contract, index) => {
