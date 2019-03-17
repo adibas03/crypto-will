@@ -220,8 +220,6 @@ class App extends Component {
                           </ContractsList>
                         </Col>
                       </Row>
-                      { JSON.stringify(this.props.drizzleStatus) }
-                      {this.state.selectedAccount}
                     </Content>
                   </Layout>
                 </Content>
