@@ -3,7 +3,7 @@ import { Switch, Redirect } from 'react-router';
 import { HashRouter, Link, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 
-import { web3Scripts } from '../Scripts';
+import { web3Scripts, eacScript } from '../Scripts';
 
 import { Accounts, Contract, ContractsList, Deployer }  from "./Components";
 
