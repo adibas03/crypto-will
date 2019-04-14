@@ -2,11 +2,12 @@ pragma solidity ^0.4.24;
 
 import "../installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol";
 import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol";
+import '../WithSchedule.sol'
 
 /**
 * Vault only instantiation, only focuses on eth value
 */
-contract Will is Ownable {
+contract Will is Ownable, WithSchedule {
   using SafeMath for uint;
   uint256 constant public version = 0;
 

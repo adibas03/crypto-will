@@ -36,12 +36,12 @@ class Collapsable extends Component {
                 <Col onClick={this.toggleCollapse} span={24} style={{ cursor: 'pointer', margin: '0 0 12px' }}>
                     <div style={{minHeight: '24px'}} >
                         {typeof title === 'string' &&
-                                <h3>
-                                    {title} <Icon type={this.state.collapsed ? 'caret-right' : 'caret-down'} style={{marginLeft: '12px', color: 'gray'}}/>
-                                </h3>
+                            <h3>
+                                {title} <Icon type={this.state.collapsed ? 'caret-right' : 'caret-down'} style={{marginLeft: '12px', color: 'gray'}}/>
+                            </h3>
                         }
                         {typeof title === 'object' &&
-                                {title}
+                            {title}
                         }
                         {typeof title === 'function' && 
                             <Title collapsed={this.state.collapsed} toggleCollapse={this.toggleCollapse} />
