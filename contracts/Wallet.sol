@@ -14,8 +14,8 @@ contract Wallet is Ownable {
     public
   {}
 
-  function transfer (address _destination, uint256 _value)
-    public onlyOwner
+  function transferEth (address _destination, uint256 _value)
+    public payable onlyOwner
   returns (bool) {
     _destination.transfer(_value);
     return true;

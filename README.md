@@ -1,7 +1,7 @@
 # Crypto-Will
 Crypto-Will is a tool to deploy your personal will on the Ethereum blockchain.  
 https://adibas03.github.io/crypto-will/  
-  
+
 You can:
   - add beneficiaries,
   - delete beneficiaries,
@@ -14,15 +14,15 @@ You can:
 
 #### Ropsten
 ```
-  Deployer: 0x4db41D4330FDE79b04e102C11B13F419Cbd23C9f
+  Deployer: 0xeB480c17e32f63B3F40f7ed1Ba752Bd553279216
 ```
 #### Rinkeby
 ```
-  Deployer: 0xeeB34E4185fa2fa08c249FF1b859De1F677a74D1
+  Deployer: 0x8aF6567a728a87cADf01883fFe8769259B159261
 ```
 #### Kovan  
 ```
-  Deployer: 0x4A7D8b802A60eB0D6d87c356529E89eEd3d838e6
+  Deployer: 0xc9Be26AEE034c8E2928553cE31A87b63Abfe7690
 ```
 
 ## Tests
