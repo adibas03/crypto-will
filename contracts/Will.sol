@@ -78,6 +78,11 @@ contract Will is Ownable, WithSchedule {
     require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
     require(_disposition > 0, 'Disposition must be greter than 0');
     require(isBeneficiary(_beneficiary) == false, 'Cannot add existing beneficiary Anew, use update');
+
+    //reset lastInteraction
+    postpone();
+
+    // add beneficiary
     beneficiaryIndex[_beneficiary] = beneficiaries.length;
     disposition[_beneficiary] = _disposition;
     beneficiaries.push(_beneficiary);
@@ -89,11 +94,16 @@ contract Will is Ownable, WithSchedule {
   returns (bool)
   {
     require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
+    require(_beneficiary != beneficiaries[0], 'Cannot update Contract Owner disposition');
     require(_disposition > 0, 'Disposition must be greter than 0');
     require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
     if (getBeneficiaryIndex(_beneficiary) == 0) {
       return _addBeneficiary(_beneficiary,_disposition);
     } else {
+      //reset lastInteraction
+      postpone();
+
+      //update disposition
       disposition[_beneficiary] = _disposition;
       emit BeneficiaryUpdated(_beneficiary, _disposition);
       return true;
@@ -125,6 +135,9 @@ contract Will is Ownable, WithSchedule {
 
     assert(beneficiaries[idx] == _beneficiary);
     require(idx != 0, 'You can not remove the creator as a beneficiary');//Ensure  first beneficiary can never be removed
+
+    //reset lastInteraction
+    postpone();
 
     //Remove beneficiary
     delete(disposition[_beneficiary]);
