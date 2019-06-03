@@ -1,2 +1,2 @@
 export { web3Scripts, CONTRACT_ARRAYs_LENGTH, BENEFICIARY_EVENT, NULL_ADDRESS } from './web3Scripts';
-export { default as eacScript } from './eacScript';
+export { default as eacScript, Networks as eacNetworks } from './eacScript';
