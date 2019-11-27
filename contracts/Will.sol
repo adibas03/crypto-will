@@ -1,14 +1,14 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.10;
 
-import "../installed_contracts/zeppelin-solidity/contracts/math/SafeMath.sol";
-import "../installed_contracts/zeppelin-solidity/contracts/ownership/Ownable.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/ownership/Ownable.sol";
+import './Version.sol';
 
 /**
 * Vault only instantiation, only focuses on eth value
 */
-contract Will is Ownable {
+contract Will is Ownable, Version {
   using SafeMath for uint;
-  uint256 constant public version = 0;
 
   uint256 constant ONE = 1; //Constant representation of 1
   uint256 constant public maxArrayLength = 10; //Maximum length of array for functions that accept arrays
@@ -74,7 +74,7 @@ contract Will is Ownable {
     internal onlyOwner
   returns (bool)
   {
-    require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
+    require(_beneficiary != address(0), '_beneficiary cannot be Zero');
     require(_disposition > 0, 'Disposition must be greter than 0');
     require(isBeneficiary(_beneficiary) == false, 'Cannot add existing beneficiary Anew, use update');
 
@@ -92,7 +92,7 @@ contract Will is Ownable {
     public onlyOwner
   returns (bool)
   {
-    require(_beneficiary != 0x0, '_beneficiary cannot be Zero');
+    require(_beneficiary != address(0), '_beneficiary cannot be Zero');
     require(_beneficiary != beneficiaries[0], 'Cannot update Contract Owner disposition');
     require(_disposition > 0, 'Disposition must be greter than 0');
     require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
@@ -110,13 +110,13 @@ contract Will is Ownable {
   }
 
   // Update batch of up to Ten (10) beneficiaries, beneficiary must have corresponding index for disposition in _dispositions
-  function updateBeneficiaries (address[10] _beneficiaries, uint256[10] _dispositions)
+  function updateBeneficiaries (address[10] memory _beneficiaries, uint256[10] memory _dispositions)
     public onlyOwner
   returns (bool)
   {
 
     for (uint256 i=0; i<maxArrayLength; i++) {
-      if (_beneficiaries[i] != 0x0) {
+      if (_beneficiaries[i] != address(0)) {
         updateBeneficiary(_beneficiaries[i], _dispositions[i]);
       }
     }
@@ -127,7 +127,7 @@ contract Will is Ownable {
     public onlyOwner
   returns (bool)
   {
-    require(_beneficiary != 0x0, 'Provide a beneficiary address to remove');
+    require(_beneficiary != address(0), 'Provide a beneficiary address to remove');
     require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
 
     uint256 idx = getBeneficiaryIndex(_beneficiary);
@@ -153,12 +153,12 @@ contract Will is Ownable {
   }
 
   //Remove up to Ten(10) beneficiaries
-  function removeBeneficiaries (address[10] _beneficiaries)
+  function removeBeneficiaries (address[10] memory _beneficiaries)
       public onlyOwner
   returns (bool) {
 
     for (uint256 i=0; i<maxArrayLength; i++) {
-      if (_beneficiaries[i] != 0x0) {
+      if (_beneficiaries[i] != address(0)) {
         removeBeneficiary(_beneficiaries[i]);
       }
     }
@@ -189,11 +189,13 @@ contract Will is Ownable {
     if (beneficiaries.length > 1) {
       for (uint256 _b=1;_b<beneficiaries.length;_b++) {
         amountDue = _calcDispositionDue(beneficiaries[_b], _balance, _dispositionSum);
-        beneficiaries[_b].transfer( amountDue );
+        address payable beneficiary = address(uint160(beneficiaries[_b]));
+        beneficiary.transfer( amountDue );
         emit BeneficiarySettled(beneficiaries[_b], amountDue);
       }
     }
-    beneficiaries[0].transfer(address(this).balance);
+    address payable createdBy = address(uint160(beneficiaries[0]));
+    createdBy.transfer(address(this).balance);
     disbursing = false;
   }
 
@@ -205,9 +207,9 @@ contract Will is Ownable {
   * - Owner sends no value to contract: postpone is triggerred if not yet disbursed
   */
   function ()
-    public payable
+    external payable
   {
-    if (msg.sender == owner && disbursed == false) {
+    if (msg.sender == owner() && disbursed == false) {
       postpone();
     } else if (msg.value == 0 && isDispositionDue()) {
       triggerDisposition();
