@@ -57,5 +57,9 @@ module.exports = {
     solc: {
       version: "0.5.10" // Any published image name
     }
+  },
+  mocha: {
+    reporter: "eth-gas-reporter"
+    // reporterOptions : { ... } // See options below
   }
 };

@@ -8,8 +8,8 @@ contract("Deployer", function(accounts) {
   const waitTime = 86400;
   let deployer;
 
-  before(async function() {
-    deployer = await Deployer.new({gas: 8000000});
+  beforeEach(async function() {
+    deployer = await Deployer.new({ gas: 18000000 });
     console.log(
       "Deployer version:",
       (await deployer.version.call()).toString()
