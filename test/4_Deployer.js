@@ -9,7 +9,7 @@ contract("Deployer", function(accounts) {
   let deployer;
 
   beforeEach(async function() {
-    deployer = await Deployer.new({ gas: 18000000 });
+    deployer = await Deployer.new();
     console.log(
       "Deployer version:",
       (await deployer.version.call()).toString()

@@ -1,4 +1,4 @@
-pragma solidity ^0.5.10;
+pragma solidity ^0.5.12;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/ownership/Ownable.sol";
@@ -70,24 +70,6 @@ contract Will is Ownable, Version {
     return (_totalBalance.mul(disposition[_beneficiary] )).div(_dispositionSum);
   }
 
-  function _addBeneficiary (address _beneficiary, uint256 _disposition)
-    internal onlyOwner
-  returns (bool)
-  {
-    require(_beneficiary != address(0), '_beneficiary cannot be Zero');
-    require(_disposition > 0, 'Disposition must be greter than 0');
-    require(isBeneficiary(_beneficiary) == false, 'Cannot add existing beneficiary Anew, use update');
-
-    //reset lastInteraction
-    postpone();
-
-    // add beneficiary
-    beneficiaryIndex[_beneficiary] = beneficiaries.length;
-    disposition[_beneficiary] = _disposition;
-    beneficiaries.push(_beneficiary);
-    emit BeneficiaryUpdated(_beneficiary, _disposition);
-  }
-
   function updateBeneficiary (address _beneficiary, uint256 _disposition)
     public onlyOwner
   returns (bool)
@@ -97,16 +79,19 @@ contract Will is Ownable, Version {
     require(_disposition > 0, 'Disposition must be greter than 0');
     require(!isDispositionDue(), 'Can not update dispositions when disposition is Due');
     if (getBeneficiaryIndex(_beneficiary) == 0) {
-      return _addBeneficiary(_beneficiary,_disposition);
-    } else {
-      //reset lastInteraction
-      postpone();
-
-      //update disposition
-      disposition[_beneficiary] = _disposition;
-      emit BeneficiaryUpdated(_beneficiary, _disposition);
-      return true;
+      // add beneficiary
+      beneficiaryIndex[_beneficiary] = beneficiaries.length;
+      beneficiaries.push(_beneficiary);
     }
+
+    //update disposition
+    disposition[_beneficiary] = _disposition;
+
+    //reset lastInteraction
+    postpone();
+
+    emit BeneficiaryUpdated(_beneficiary, _disposition);
+    return true;
   }
 
   // Update batch of up to Ten (10) beneficiaries, beneficiary must have corresponding index for disposition in _dispositions
@@ -145,7 +130,6 @@ contract Will is Ownable, Version {
     // Rearrange indexes
     beneficiaries[idx] = beneficiaries[ beneficiaries.length.sub(ONE) ];
     beneficiaryIndex[ beneficiaries[idx] ] = idx;
-    delete(beneficiaries[beneficiaries.length.sub(ONE)]);
     beneficiaries.length--;
 
     emit BeneficiaryUpdated(_beneficiary, 0);

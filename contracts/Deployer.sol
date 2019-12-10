@@ -1,7 +1,7 @@
-pragma solidity ^0.5.10;
+pragma solidity ^0.5.12;
 
 import "@openzeppelin/contracts/lifecycle/Pausable.sol";
-import "./WillWallet.sol";
+import "./libraries/DeployerLibrary.sol";
 import "./Version.sol";
 
 contract Deployer is Pausable, Version {
@@ -10,7 +10,6 @@ contract Deployer is Pausable, Version {
     public
   {}
 
-  enum ContractTypes { will, wallet, willwallet }
   event ContractDeployed(string contractType, address indexed contractAddress, address indexed creator);
 
   function _transferOwnership(address _contract, address _newOwner)
@@ -28,18 +27,11 @@ contract Deployer is Pausable, Version {
     }
   }
 
-  function _deployContract(ContractTypes _type, uint256 _waitTime)
+  function _deployContract(DeployerLibrary.ContractTypes _type, uint256 _waitTime)
   internal
   returns (address newContract)
   {
-    if (_type == ContractTypes.will) {
-      newContract = address(new Will(_waitTime));
-    } else if (_type == ContractTypes.wallet) {
-      newContract = address(new Wallet());
-    } else if (_type == ContractTypes.willwallet) {
-      WillWallet willwallet = new WillWallet(_waitTime);
-      // newContract = address(willwallet);
-    }
+    newContract = DeployerLibrary.deployContract(_type, _waitTime);
     if (newContract != address(0)) {
       _transferOwnership(newContract, msg.sender);
       _handleDeposit(newContract);
@@ -49,7 +41,7 @@ contract Deployer is Pausable, Version {
   function deployWill(uint256 _waitTime)
   public whenNotPaused
   {
-    address newContract = _deployContract(ContractTypes.will, _waitTime);
+    address newContract = _deployContract(DeployerLibrary.ContractTypes.will, _waitTime);
     require(newContract != address(0), 'Will not successfull deployed');
     emit ContractDeployed('will', newContract, msg.sender);
   }
@@ -57,7 +49,7 @@ contract Deployer is Pausable, Version {
   function deployWallet()
   public whenNotPaused
   {
-    address newContract = _deployContract(ContractTypes.wallet, 0);
+    address newContract = _deployContract(DeployerLibrary.ContractTypes.wallet, 0);
     require(newContract != address(0), 'Wallet not successfull deployed');
     emit ContractDeployed('wallet', newContract, msg.sender);
   }
@@ -65,7 +57,7 @@ contract Deployer is Pausable, Version {
   function deployWillWallet(uint256 _waitTime)
   public whenNotPaused
   {
-    address newContract = _deployContract(ContractTypes.willwallet, _waitTime);
+    address newContract = _deployContract(DeployerLibrary.ContractTypes.willwallet, _waitTime);
     require(newContract != address(0), 'Willwallet not successfull deployed');
     emit ContractDeployed('willwallet', newContract, msg.sender);
   }

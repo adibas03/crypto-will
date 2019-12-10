@@ -55,7 +55,7 @@ module.exports = {
   },
   compilers: {
     solc: {
-      version: "0.5.10" // Any published image name
+      version: "0.5.12" // Any published image name
     }
   },
   mocha: {

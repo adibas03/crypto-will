@@ -1,4 +1,4 @@
-pragma solidity ^0.5.10;
+pragma solidity ^0.5.12;
 
 import "@openzeppelin/contracts/ownership/Ownable.sol";
 import './Version.sol';
@@ -21,7 +21,7 @@ contract Wallet is Ownable, Version {
     return true;
   }
 
-  function callFunction (address _address, uint256 _value, bytes memory _callData) //Can be used to make wallet type calls, to interact with smart contracts
+  function callFunction (address payable _address, uint256 _value, bytes memory _callData) //Can be used to make wallet type calls, to interact with smart contracts
     public payable onlyOwner
   returns (bool, bytes memory) {
     return _address.call.value(_value)(_callData);
