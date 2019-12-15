@@ -14,6 +14,8 @@
 const MNEMONIC =
   "tragic lab sheriff bag clump cabin arena head trophy exit traffic thrive napkin hurdle green";
 
+const PROJECT_ID = "";
+
 module.exports = {
   // See <http://truffleframework.com/docs/advanced/configuration>
   // to customize your Truffle configuration!
@@ -27,7 +29,10 @@ module.exports = {
       network_id: 42,
       provider: function() {
         const HDWalletProvider = require("truffle-hdwallet-provider");
-        return new HDWalletProvider(MNEMONIC, "https://kovan.infura.io");
+        return new HDWalletProvider(
+          MNEMONIC,
+          `https://kovan.infura.io/v3/${PROJECT_ID}`
+        );
       },
       gasPrice: 2000000000
     },
@@ -35,7 +40,10 @@ module.exports = {
       network_id: 4,
       provider: function() {
         const HDWalletProvider = require("truffle-hdwallet-provider");
-        return new HDWalletProvider(MNEMONIC, "https://rinkeby.infura.io");
+        return new HDWalletProvider(
+          MNEMONIC,
+          `https://rinkeby.infura.io/v3/${PROJECT_ID}`
+        );
       },
       gasPrice: 2000000000
     },
@@ -43,7 +51,10 @@ module.exports = {
       network_id: 3,
       provider: function() {
         const HDWalletProvider = require("truffle-hdwallet-provider");
-        return new HDWalletProvider(MNEMONIC, "https://ropsten.infura.io");
+        return new HDWalletProvider(
+          MNEMONIC,
+          `https://ropsten.infura.io/v3/${PROJECT_ID}`
+        );
       },
       gasPrice: 2000000000
     },
