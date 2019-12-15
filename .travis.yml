@@ -12,7 +12,7 @@ script:
   - npm i ganache-cli
   - ganache-cli -i 1002 -l 8000000 > /dev/null &
   - npm run truffle:test
-  - npm run truffle:migrate -- --netwotk=development
+  - npm run truffle:migrate -- --network=development
   - npm run build
 deploy:
   provider: pages
@@ -21,4 +21,4 @@ deploy:
   keep-history: true
   local-dir: "dist"
   on:
-    branch: "master"
+    branch: "test/spa-github-pages"
