@@ -19,6 +19,11 @@
     "name": "Adibas03",
     "url": "http://github.com/adibas03"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adibas03/crypto-will.git"
+  },
+  "homepage": "https://adibas03.github.io/crypto-will/",
   "license": "ISC",
   "dependencies": {
     "antd": "^3.25.3",

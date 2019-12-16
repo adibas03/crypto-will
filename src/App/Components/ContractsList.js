@@ -5,217 +5,261 @@ import Collapsable from "./Collapsable";
 import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 
-import { web3Scripts } from '../../Scripts';
+import { web3Scripts } from "../../Scripts";
+import { homepage } from "../../../package.json";
 
-import Card from 'antd/lib/card';
-import Col from 'antd/lib/col';
-import Divider from 'antd/lib/divider';
-import Icon from 'antd/lib/icon';
-import Layout from 'antd/lib/layout';
-import notification from 'antd/lib/notification';
-import Row from 'antd/lib/row';
+import Card from "antd/lib/card";
+import Col from "antd/lib/col";
+import Divider from "antd/lib/divider";
+import Icon from "antd/lib/icon";
+import Layout from "antd/lib/layout";
+import notification from "antd/lib/notification";
+import Row from "antd/lib/row";
 
-import 'antd/lib/card/style';
-import 'antd/lib/col/style';
-import 'antd/lib/divider/style';
-import 'antd/lib/icon/style';
-import 'antd/lib/layout/style';
-import 'antd/lib/notification/style';
-import 'antd/lib/row/style';
+import "antd/lib/card/style";
+import "antd/lib/col/style";
+import "antd/lib/divider/style";
+import "antd/lib/icon/style";
+import "antd/lib/layout/style";
+import "antd/lib/notification/style";
+import "antd/lib/row/style";
 
 import { Explorers } from "../../Config";
 
 class Title extends Component {
-    static props = {
-        collapsed: PropTypes.bool,
-        fetchingContracts: PropTypes.bool,
-        foundContracts: PropTypes.number,
-        toggleCollapse: PropTypes.func.isRequired
-    }
-    render () {
-        return (
-            <Row gutter={0} >
-                <Col span={20} onClick={this.props.toggleCollapse}>
-                    <h2>
-                        Deployed Contracts
-                        <Icon type={this.props.collapsed ? 'caret-right' : 'caret-down'} style={{marginLeft: '12px', color: 'gray'}}/>
-                    </h2>
-                </Col>
-                <Col span={4}>
-                    <Row gutter={0} justify='center'>
-                        <Col span={11} >
-                            <NavLink to='/deploy' title='New contract' >
-                                <Icon type='plus-square' style={{ fontSize: '28px' }} />
-                            </NavLink>
-                        </Col>
-                        <Col span={11} >
-                            <h3>: { this.props.fetchingContracts ? '...' : this.props.foundContracts }</h3>
-                        </Col>
-                    </Row>
-                </Col>
-            </Row>
-        )
-    }
+  static props = {
+    collapsed: PropTypes.bool,
+    fetchingContracts: PropTypes.bool,
+    foundContracts: PropTypes.number,
+    toggleCollapse: PropTypes.func.isRequired
+  };
+  render() {
+    return (
+      <Row gutter={0}>
+        <Col span={20} onClick={this.props.toggleCollapse}>
+          <h2>
+            Deployed Contracts
+            <Icon
+              type={this.props.collapsed ? "caret-right" : "caret-down"}
+              style={{ marginLeft: "12px", color: "gray" }}
+            />
+          </h2>
+        </Col>
+        <Col span={4}>
+          <Row gutter={0} justify="center">
+            <Col span={11}>
+              <NavLink to={`${homepage}/deploy`} title="New contract">
+                <Icon type="plus-square" style={{ fontSize: "28px" }} />
+              </NavLink>
+            </Col>
+            <Col span={11}>
+              <h3>
+                :{" "}
+                {this.props.fetchingContracts
+                  ? "..."
+                  : this.props.foundContracts}
+              </h3>
+            </Col>
+          </Row>
+        </Col>
+      </Row>
+    );
+  }
 }
 
-
 class ContractsList extends Component {
-    state = {
-        activeAccount: '',
-        foundContracts: [],
-        fetchingContracts: false,
-        runningSubscription: null
+  state = {
+    activeAccount: "",
+    foundContracts: [],
+    fetchingContracts: false,
+    runningSubscription: null
+  };
+
+  constructor(props) {
+    super(props);
+    this.fetchDeployedContracts = this.fetchDeployedContracts.bind(this);
+    this.accountUpdated = this.accountUpdated.bind(this);
+
+    this.props.accountUpdated(this.accountUpdated);
+    this.props.networkUpdated(this.fetchDeployedContracts);
+    this.accountUpdated();
+  }
+
+  get fetchingContracts() {
+    return !!this.state.runningSubscription;
+  }
+
+  get displayList() {
+    return this.props.foundContracts.sort(function compareNumbers(a, b) {
+      return b.blockNumber - a.blockNumber;
+    });
+  }
+
+  accountUpdated() {
+    if (!this._mounted) {
+      return;
     }
-
-    constructor (props) {
-        super(props);
-        this.fetchDeployedContracts = this.fetchDeployedContracts.bind(this);
-        this.accountUpdated = this.accountUpdated.bind(this);
-
-        this.props.accountUpdated(this.accountUpdated);
-        this.props.networkUpdated(this.fetchDeployedContracts);
-        this.accountUpdated();
+    if (!this.accountLoaded()) {
+      // this.setState({ activeAccount: this.props.selectedAccount }, () => {
+      this.fetchDeployedContracts();
+      // });
     }
+  }
 
-    get fetchingContracts () {
-        return !!this.state.runningSubscription;
+  accountLoaded() {
+    return this.state.activeAccount === this.props.selectedAccount;
+  }
+
+  contractReady() {
+    return !!this.props.DeployerContract;
+  }
+
+  accountReady() {
+    return !!this.props.selectedAccount;
+  }
+
+  async fetchDeployedContracts(force = false) {
+    if (
+      !this._mounted ||
+      !this.accountReady() ||
+      !this.contractReady() ||
+      (!force && this.fetchingContracts && this.accountLoaded())
+    ) {
+      return;
     }
-
-    get displayList () {
-        return this.props.foundContracts.sort(
-            function compareNumbers(a, b) {
-                return b.blockNumber - a.blockNumber;
-            });
+    if (this.state.runningSubscription) {
+      await web3Scripts.unsubscribeEvent(this.state.runningSubscription);
     }
+    const selectedAccount = this.props.selectedAccount;
 
-    accountUpdated () {
-        if (!this._mounted) {
-            return;
+    this.setState({
+      foundContracts: [],
+      fetchingContracts: true,
+      runningSubscription: null
+    });
+    try {
+      const fetchSubscription = web3Scripts.fetchDeployments(
+        this.props.DeployerContract,
+        this.props.networkId,
+        { creator: [selectedAccount] },
+        {
+          onData: event => {
+            this.props.foundNewContract(event);
+            this.forceUpdate();
+          },
+          onChanged: event => console.log("Changed", event)
         }
-        if (!this.accountLoaded()) {
-            // this.setState({ activeAccount: this.props.selectedAccount }, () => {
-                this.fetchDeployedContracts();
-            // });
-        }
-    }
+      );
 
-    accountLoaded () {
-        return this.state.activeAccount === this.props.selectedAccount;
-    }
-
-    contractReady () {
-        return !!this.props.DeployerContract;
-    }
-
-    accountReady () {
-        return !!this.props.selectedAccount;
-    }
-
-    async fetchDeployedContracts (force = false) {
-        if (!this._mounted || !this.accountReady() || !this.contractReady() || (!force && (this.fetchingContracts && this.accountLoaded()))) {
-            return ;
-        }
-        if (this.state.runningSubscription) {
-            await web3Scripts.unsubscribeEvent(this.state.runningSubscription);
-        }
-        const selectedAccount = this.props.selectedAccount;
-
+      fetchSubscription.then(sub => {
         this.setState({
-            foundContracts: [],
-            fetchingContracts: true,
-            runningSubscription: null
+          activeAccount: selectedAccount,
+          runningSubscription: sub,
+          fetchingContracts: false
         });
-        try {
-            const fetchSubscription = web3Scripts.fetchDeployments(this.props.DeployerContract, this.props.networkId, { creator: [ selectedAccount ] }, {
-                onData: (event) => {
-                    this.props.foundNewContract(event);
-                    this.forceUpdate();
-                },
-                onChanged: (event) => console.log('Changed', event)
-            });
+      });
+    } catch (e) {
+      notification["error"]({
+        duration: 0,
+        message: "Contract List failed to load",
+        description: e.message || e
+      });
+    }
+  }
 
-            fetchSubscription.then(sub => {
-                this.setState({
-                    activeAccount: selectedAccount,
-                    runningSubscription: sub,
-                    fetchingContracts: false
-                });
-            });
-        } catch (e) {
-            notification['error']({
-                duration: 0,
-                message: 'Contract List failed to load',
-                description: e.message || e
-            });
-        }
-    }
+  componentDidMount() {
+    this._mounted = true;
+    this.fetchDeployedContracts();
+  }
 
-    componentDidMount () {
-        this._mounted = true;
-        this.fetchDeployedContracts();
-    }
-  
-    componentWillUnmount () {
-      this._mounted = false;
-    }
-    
-    render () {
-        return (
-            <Collapsable opened title={ (props) => 
-                    <Title fetchingContracts={this.state.fetchingContracts} foundContracts={this.props.foundContracts.length} {...props} />
-            }>
-                <Layout style={{ overflowY: 'auto', maxHeight: '900px' }}>
-                    {this.displayList.map( (contract, index) => {
-                        return (
-                            <div key={index}>
-                                <Card
-                                    title={
-                                        <NavLink to={`/contract/${ contract.returnValues.contractAddress }`} >
-                                            { `${index+1}: ${ contract.returnValues.contractAddress }` }
-                                        </NavLink>}
-                                    style={{ background: 'transparent' }}
-                                    headStyle={{ background: '#dedede' }}
-                                    extra={
-                                        <a title='Block Explorer' target='_blank' href={ Explorers[this.props.networkId] ? `${Explorers[this.props.networkId]}/address/${contract.returnValues.contractAddress}` : '#' }>
-                                            <Icon type='cluster' style={{ fontSize: '24px' }}/>
-                                        </a>}
-                                >
-                                    <Row>
-                                        <Col span={5}>
-                                            <h4>Type:</h4>
-                                        </Col>
-                                        <Col span={19} className='word-wrapped'>{ contract.returnValues.contractType }</Col>
-                                    </Row>
-                                    <Row>
-                                        <Col span={5}>
-                                            <h4>Block:</h4>
-                                        </Col>
-                                        <Col span={19} className='word-wrapped'>{ contract.blockNumber }</Col>
-                                    </Row>
-                                    <Row>
-                                        <Col span={5}>
-                                            <h4>Tx Hash:</h4>
-                                        </Col>
-                                        <Col span={19} className='word-wrapped'>{ contract.transactionHash }</Col>
-                                    </Row>
-                                </Card>
-                            </div>
-                        );
-                    })}
-                </Layout>
-            </Collapsable>
-        );
-    }
+  componentWillUnmount() {
+    this._mounted = false;
+  }
+
+  render() {
+    return (
+      <Collapsable
+        opened
+        title={props => (
+          <Title
+            fetchingContracts={this.state.fetchingContracts}
+            foundContracts={this.props.foundContracts.length}
+            {...props}
+          />
+        )}
+      >
+        <Layout style={{ overflowY: "auto", maxHeight: "900px" }}>
+          {this.displayList.map((contract, index) => {
+            return (
+              <div key={index}>
+                <Card
+                  title={
+                    <NavLink
+                      to={`${homepage}/contract/${contract.returnValues.contractAddress}`}
+                    >
+                      {`${index + 1}: ${contract.returnValues.contractAddress}`}
+                    </NavLink>
+                  }
+                  style={{ background: "transparent" }}
+                  headStyle={{ background: "#dedede" }}
+                  extra={
+                    <a
+                      title="Block Explorer"
+                      target="_blank"
+                      href={
+                        Explorers[this.props.networkId]
+                          ? `${Explorers[this.props.networkId]}/address/${
+                              contract.returnValues.contractAddress
+                            }`
+                          : "#"
+                      }
+                    >
+                      <Icon type="cluster" style={{ fontSize: "24px" }} />
+                    </a>
+                  }
+                >
+                  <Row>
+                    <Col span={5}>
+                      <h4>Type:</h4>
+                    </Col>
+                    <Col span={19} className="word-wrapped">
+                      {contract.returnValues.contractType}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col span={5}>
+                      <h4>Block:</h4>
+                    </Col>
+                    <Col span={19} className="word-wrapped">
+                      {contract.blockNumber}
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col span={5}>
+                      <h4>Tx Hash:</h4>
+                    </Col>
+                    <Col span={19} className="word-wrapped">
+                      {contract.transactionHash}
+                    </Col>
+                  </Row>
+                </Card>
+              </div>
+            );
+          })}
+        </Layout>
+      </Collapsable>
+    );
+  }
 }
 
 ContractsList.propTypes = {
-    selectedAccount: PropTypes.string,
-    DeployerContract: PropTypes.object,
-    accountUpdated: PropTypes.func,
-    foundcontracts: PropTypes.array,
-    foundNewContract: PropTypes.func.isRequired,
-    networkId: PropTypes.number,
-    networkUpdated: PropTypes.func
-}
+  selectedAccount: PropTypes.string,
+  DeployerContract: PropTypes.object,
+  accountUpdated: PropTypes.func,
+  foundcontracts: PropTypes.array,
+  foundNewContract: PropTypes.func.isRequired,
+  networkId: PropTypes.number,
+  networkUpdated: PropTypes.func
+};
 
 export default ErrorBoundary(NetworkComponent(ContractsList));

@@ -4,6 +4,7 @@ import {BrowserRouter, Link, Route} from "react-router-dom";
 import PropTypes from "prop-types";
 
 import {web3Scripts} from "../Scripts";
+import {homepage} from "../../package.json";
 
 import {Accounts, Contract, ContractsList, Deployer} from "./Components";
 
@@ -154,7 +155,7 @@ class App extends Component {
               <Content>
                 <Layout style={{margin: "16px 56px 0"}}>
                   <span>
-                    <Link to="/">
+                    <Link to={`${homepage}/`}>
                       <h1 className="App-title">Crypto will </h1>
                     </Link>
                   </span>
