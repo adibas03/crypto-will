@@ -1,12 +1,12 @@
-import React, {Component} from "react";
-import {Switch, Redirect} from "react-router";
-import {BrowserRouter, Link, Route} from "react-router-dom";
+import React, { Component } from "react";
+import { Switch, Redirect } from "react-router";
+import { BrowserRouter, Link, Route } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import {web3Scripts} from "../Scripts";
-import {homepage} from "../../package.json";
+import { web3Scripts } from "../Scripts";
+import { homepage } from "../../package.json";
 
-import {Accounts, Contract, ContractsList, Deployer} from "./Components";
+import { Accounts, Contract, ContractsList, Deployer } from "./Components";
 
 import Alert from "antd/lib/alert";
 import Col from "antd/lib/col";
@@ -20,10 +20,10 @@ import "antd/lib/divider/style";
 import "antd/lib/layout/style";
 import "antd/lib/row/style";
 
-const {Content} = Layout;
+const { Content } = Layout;
 
-import {drizzleConnect} from "drizzle-react";
-import {LoadingContainer} from "drizzle-react-components";
+import { drizzleConnect } from "drizzle-react";
+import { LoadingContainer } from "drizzle-react-components";
 
 class App extends Component {
   constructor(props, context) {
@@ -46,7 +46,7 @@ class App extends Component {
     if (this.state.fetchingNetwork || !this._mounted) {
       return false;
     }
-    this.setState({fetchingNetwork: true});
+    this.setState({ fetchingNetwork: true });
 
     const activeNetworkId = await web3Scripts.getNetworkId(
       this.state.drizzle.web3
@@ -74,17 +74,17 @@ class App extends Component {
     }
 
     const networkInterval = setInterval(() => {
-      const {drizzleStatus} = this.props;
+      const { drizzleStatus } = this.props;
       if (drizzleStatus.initialized && !this.state.activeNetwork) {
         this.getNetwork();
       }
     }, 1000);
-    this.setState({networkInterval});
+    this.setState({ networkInterval });
   }
 
   updateSelectedAccount(event) {
     if (this._mounted && this.state.selectedAccount !== event.key) {
-      this.setState({selectedAccount: event.key, ContractsList: []}, () => {
+      this.setState({ selectedAccount: event.key, ContractsList: [] }, () => {
         this.accountUpdated(this.state.selectedAccount);
       });
     }
@@ -132,16 +132,16 @@ class App extends Component {
   }
 
   render() {
-    const {drizzleStatus} = this.props;
+    const { drizzleStatus } = this.props;
 
     return (
-      <BrowserRouter basename="/">
+      <BrowserRouter basename={"./"}>
         <Layout
           className="App"
-          style={{minWidth: "576px", minHeight: "100vh", overflowY: "hidden"}}
+          style={{ minWidth: "576px", minHeight: "100vh", overflowY: "hidden" }}
         >
           {!drizzleStatus.initialized && (
-            <div style={{textAlign: "center"}}>
+            <div style={{ textAlign: "center" }}>
               {!this.state.fetchingNetwork && (
                 <h4>Network might not be supported</h4>
               )}
@@ -153,9 +153,9 @@ class App extends Component {
           {drizzleStatus.initialized && (
             <Layout>
               <Content>
-                <Layout style={{margin: "16px 56px 0"}}>
+                <Layout style={{ margin: "16px 56px 0" }}>
                   <span>
-                    <Link to={`${homepage}/`}>
+                    <Link to={`/`}>
                       <h1 className="App-title">Crypto will </h1>
                     </Link>
                   </span>
@@ -173,8 +173,8 @@ class App extends Component {
                   />
                 </Layout>
                 <Layout>
-                  <Content className="App-intro" style={{margin: "0 56px"}}>
-                    <Row style={{margin: "56px 0"}}>
+                  <Content className="App-intro" style={{ margin: "0 56px" }}>
+                    <Row style={{ margin: "56px 0" }}>
                       <Col>
                         <p>
                           Crypto Will, is a tool to deploy your personal will on
@@ -184,14 +184,14 @@ class App extends Component {
                           their percentage, also set the Waiting period before
                           the wealth can be disposed.
                         </p>
-                        <Divider style={{height: "2.5px", margin: "0"}} />
+                        <Divider style={{ height: "2.5px", margin: "0" }} />
                       </Col>
                     </Row>
                     {!this.state.selectedAccount && (
                       <Alert
                         description="Please select / Unlock an Account/Address to continue."
                         type="info"
-                        style={{margin: "24px 0"}}
+                        style={{ margin: "24px 0" }}
                       />
                     )}
                     <Row>
@@ -205,37 +205,41 @@ class App extends Component {
                                 from="/contract"
                                 to="/deploy"
                               ></Redirect>
+                              <Route
+                                exact
+                                path="/deploy"
+                                render={props => (
+                                  <Deployer
+                                    {...props}
+                                    selectedAccount={this.state.selectedAccount}
+                                    DeployerContract={
+                                      this.state.drizzle.contracts.Deployer
+                                    }
+                                    transactionStack={
+                                      this.props.transactionStack
+                                    }
+                                    transactions={this.props.transactions}
+                                  />
+                                )}
+                              ></Route>
+                              <Route
+                                exact
+                                path="/contract/:contractAddress"
+                                render={props => (
+                                  <Contract
+                                    {...props}
+                                    networkId={this.state.activeNetworkId}
+                                    selectedAccount={this.state.selectedAccount}
+                                    drizzle={this.state.drizzle}
+                                    transactionStack={
+                                      this.props.transactionStack
+                                    }
+                                    transactions={this.props.transactions}
+                                    contractsList={this.state.ContractsList}
+                                  />
+                                )}
+                              ></Route>
                             </Switch>
-                            <Route
-                              exact
-                              path="/deploy"
-                              render={props => (
-                                <Deployer
-                                  {...props}
-                                  selectedAccount={this.state.selectedAccount}
-                                  DeployerContract={
-                                    this.state.drizzle.contracts.Deployer
-                                  }
-                                  transactionStack={this.props.transactionStack}
-                                  transactions={this.props.transactions}
-                                />
-                              )}
-                            ></Route>
-                            <Route
-                              exact
-                              path="/contract/:contractAddress"
-                              render={props => (
-                                <Contract
-                                  {...props}
-                                  networkId={this.state.activeNetworkId}
-                                  selectedAccount={this.state.selectedAccount}
-                                  drizzle={this.state.drizzle}
-                                  transactionStack={this.props.transactionStack}
-                                  transactions={this.props.transactions}
-                                  contractsList={this.state.ContractsList}
-                                />
-                              )}
-                            ></Route>
                           </div>
                         </Col>
                       </Col>
@@ -253,7 +257,7 @@ class App extends Component {
                         <Col lg={0} md={24}>
                           <Divider
                             type="horizontal"
-                            style={{height: "2.5px"}}
+                            style={{ height: "2.5px" }}
                           />
                         </Col>
                       </Col>

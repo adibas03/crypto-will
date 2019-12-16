@@ -6,7 +6,6 @@ import ErrorBoundary from "./ErrorBoundary";
 import NetworkComponent from "./NetworkComponent";
 
 import { web3Scripts } from "../../Scripts";
-import { homepage } from "../../../package.json";
 
 import Card from "antd/lib/card";
 import Col from "antd/lib/col";
@@ -48,7 +47,7 @@ class Title extends Component {
         <Col span={4}>
           <Row gutter={0} justify="center">
             <Col span={11}>
-              <NavLink to={`${homepage}/deploy`} title="New contract">
+              <NavLink to={`/deploy`} title="New contract">
                 <Icon type="plus-square" style={{ fontSize: "28px" }} />
               </NavLink>
             </Col>
@@ -195,7 +194,7 @@ class ContractsList extends Component {
                 <Card
                   title={
                     <NavLink
-                      to={`${homepage}/contract/${contract.returnValues.contractAddress}`}
+                      to={`/contract/${contract.returnValues.contractAddress}`}
                     >
                       {`${index + 1}: ${contract.returnValues.contractAddress}`}
                     </NavLink>
