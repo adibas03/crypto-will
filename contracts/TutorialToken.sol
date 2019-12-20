@@ -1,8 +1,8 @@
-pragma solidity ^0.4.24;
+pragma solidity ^0.5.12;
 
-import "../installed_contracts/zeppelin-solidity/contracts/token/ERC20/StandardToken.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
-contract TutorialToken is StandardToken {
+contract TutorialToken is ERC20 {
   string public name = "TutorialToken";
   string public symbol = "TT";
   uint public decimals = 8;
@@ -10,8 +10,7 @@ contract TutorialToken is StandardToken {
   address public minter;
 
   constructor() public {
-    totalSupply_ = INITIAL_SUPPLY;
-    balances[msg.sender] = INITIAL_SUPPLY;
+    _mint(msg.sender, INITIAL_SUPPLY);
     minter = msg.sender;
   }
 
@@ -19,6 +18,6 @@ contract TutorialToken is StandardToken {
     public
   {
     require(minter == msg.sender, 'Only minter can mint tokens' );
-    balances[_receiver] = balances[_receiver] + _amount;
+    _mint(_receiver, _amount);
   }
 }
