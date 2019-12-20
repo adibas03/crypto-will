@@ -5599,17 +5599,20 @@
             {
               "indexed": false,
               "name": "contractType",
-              "type": "string"
+              "type": "string",
+              "internalType": "string"
             },
             {
               "indexed": true,
               "name": "contractAddress",
-              "type": "address"
+              "type": "address",
+              "internalType": "address"
             },
             {
               "indexed": true,
               "name": "creator",
-              "type": "address"
+              "type": "address",
+              "internalType": "address"
             }
           ],
           "name": "ContractDeployed",
@@ -5660,11 +5663,69 @@
           "name": "OwnershipTransferred",
           "type": "event",
           "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        },
+        "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Paused",
+          "type": "event",
+          "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+        },
+        "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserAdded",
+          "type": "event",
+          "signature": "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8"
+        },
+        "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserRemoved",
+          "type": "event",
+          "signature": "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e"
+        },
+        "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Unpaused",
+          "type": "event",
+          "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
         }
       },
-      "links": {},
-      "address": "0xCA4521A4618a6E9f9936E75EC8C86fD87A9613EB",
-      "transactionHash": "0x551281396cc19a3d2f1092bb100dc474e457cdc8d4ed46b1b192286f8339a61a"
+      "links": {
+        "DeployerLibrary": "0x67A8547AA408fECe8bD6507437A6Ff0aFEDB2e28"
+      },
+      "address": "0x8c1bE0Ce03E6cd2Ab8DBAAADe93Ba0d3d57867f6",
+      "transactionHash": "0x95fe51815068be103c402a8bd7007ce49e4cab09848da17311451814ea33c13f"
     },
     "4": {
       "events": {
@@ -5674,17 +5735,20 @@
             {
               "indexed": false,
               "name": "contractType",
-              "type": "string"
+              "type": "string",
+              "internalType": "string"
             },
             {
               "indexed": true,
               "name": "contractAddress",
-              "type": "address"
+              "type": "address",
+              "internalType": "address"
             },
             {
               "indexed": true,
               "name": "creator",
-              "type": "address"
+              "type": "address",
+              "internalType": "address"
             }
           ],
           "name": "ContractDeployed",
@@ -5735,11 +5799,69 @@
           "name": "OwnershipTransferred",
           "type": "event",
           "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        },
+        "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Paused",
+          "type": "event",
+          "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+        },
+        "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserAdded",
+          "type": "event",
+          "signature": "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8"
+        },
+        "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserRemoved",
+          "type": "event",
+          "signature": "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e"
+        },
+        "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Unpaused",
+          "type": "event",
+          "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
         }
       },
-      "links": {},
-      "address": "0xF7ADffb5ea1814990bea947c94892B2ECc7BE8b5",
-      "transactionHash": "0xfaeefe981c10aa85def20f02cd86401516de6e95ee394827b52e63be34d28b20"
+      "links": {
+        "DeployerLibrary": "0xd3CB573e916aFC5435Ec0f9408f1aEFF6a7f990A"
+      },
+      "address": "0xE64fA3879F97EB0D50BF4157300db0DDb5C27F30",
+      "transactionHash": "0x1b54b15800739d1f7a8022d5860e5f31fc72dc607834efd7efb92c0d12a11f00"
     },
     "42": {
       "events": {
@@ -5749,17 +5871,20 @@
             {
               "indexed": false,
               "name": "contractType",
-              "type": "string"
+              "type": "string",
+              "internalType": "string"
             },
             {
               "indexed": true,
               "name": "contractAddress",
-              "type": "address"
+              "type": "address",
+              "internalType": "address"
             },
             {
               "indexed": true,
               "name": "creator",
-              "type": "address"
+              "type": "address",
+              "internalType": "address"
             }
           ],
           "name": "ContractDeployed",
@@ -5810,11 +5935,69 @@
           "name": "OwnershipTransferred",
           "type": "event",
           "signature": "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0"
+        },
+        "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Paused",
+          "type": "event",
+          "signature": "0x62e78cea01bee320cd4e420270b5ea74000d11b0c9f74754ebdbfc544b05a258"
+        },
+        "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserAdded",
+          "type": "event",
+          "signature": "0x6719d08c1888103bea251a4ed56406bd0c3e69723c8a1686e017e7bbe159b6f8"
+        },
+        "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "PauserRemoved",
+          "type": "event",
+          "signature": "0xcd265ebaf09df2871cc7bd4133404a235ba12eff2041bb89d9c714a2621c7c7e"
+        },
+        "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "internalType": "address",
+              "name": "account",
+              "type": "address"
+            }
+          ],
+          "name": "Unpaused",
+          "type": "event",
+          "signature": "0x5db9ee0a495bf2e6ff9c91a7834c1ba4fdd244a5e8aa4e537bd38aeae4b073aa"
         }
       },
-      "links": {},
-      "address": "0x80baD2B698d95DF5A213decE310E793413F7194F",
-      "transactionHash": "0x0cc14d966cedc77573d502f14903beb705c43e390a16af98e35230c087d4b32e"
+      "links": {
+        "DeployerLibrary": "0x395938BB0033F43a99Fb0F61D3ddDfAcC243C78d"
+      },
+      "address": "0x0F336C5c2b7EbfC22b47bD5211A43D70ee7A6ab5",
+      "transactionHash": "0x8f5caa9965a712424cf3c9564c1f8c23c71881e12bd710635bb2c446b111aba6"
     },
     "1002": {
       "events": {
@@ -5909,7 +6092,8 @@
     }
   },
   "schemaVersion": "3.0.19",
-  "updatedAt": "2019-12-19T23:50:35.597Z",
+  "updatedAt": "2019-12-20T22:45:49.222Z",
+  "networkType": "ethereum",
   "devdoc": {
     "methods": {
       "pause()": {
