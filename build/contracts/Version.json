@@ -1,0 +1,208 @@
+{
+  "contractName": "Version",
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "version",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "metadata": "{\"compiler\":{\"version\":\"0.5.12+commit.7709ece9\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"version\",\"outputs\":[{\"internalType\":\"uint8\",\"name\":\"\",\"type\":\"uint8\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{}},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"/media/brvhrt/Vault/Store/New-folder/cwl/contracts/Version.sol\":\"Version\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"optimizer\":{\"enabled\":false,\"runs\":200},\"remappings\":[]},\"sources\":{\"/media/brvhrt/Vault/Store/New-folder/cwl/contracts/Version.sol\":{\"keccak256\":\"0xbaef3ae14ac1db7b3c599496c03b07a0eaa67d05de537213a12d96e73bb98430\",\"urls\":[\"bzz-raw://2bba3246d4c8b7a9628b3bf6e48e431963c74eca50c266cac5c115cbe60d800c\",\"dweb:/ipfs/QmYN29Qm55rmxAJ9LUXvaGxvxmqnziwTx1kqzpZG7JHRG9\"]}},\"version\":1}",
+  "bytecode": "0x6080604052348015600f57600080fd5b5060898061001e6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c806354fd4d5014602d575b600080fd5b6033604f565b604051808260ff1660ff16815260200191505060405180910390f35b60018156fea265627a7a72315820cf87ece7bbc96dfe13621717b5a2bd72f8705eac5f93d68da0e8e7b77c4d546d64736f6c634300050c0032",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c806354fd4d5014602d575b600080fd5b6033604f565b604051808260ff1660ff16815260200191505060405180910390f35b60018156fea265627a7a72315820cf87ece7bbc96dfe13621717b5a2bd72f8705eac5f93d68da0e8e7b77c4d546d64736f6c634300050c0032",
+  "sourceMap": "30:59:3:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;30:59:3;;;;;;;",
+  "deployedSourceMap": "30:59:3:-;;;;8:9:-1;5:2;;;30:1;27;20:12;5:2;30:59:3;;;;;;;;;;;;;;;;;;;52:33;;;:::i;:::-;;;;;;;;;;;;;;;;;;;;;;;;84:1;52:33;:::o",
+  "source": "pragma solidity ^0.5.12;\r\n\r\n\r\ncontract Version {\r\n  uint8 constant public version = 1;\r\n}\r\n",
+  "sourcePath": "/media/brvhrt/Vault/Store/New-folder/cwl/contracts/Version.sol",
+  "ast": {
+    "absolutePath": "/media/brvhrt/Vault/Store/New-folder/cwl/contracts/Version.sol",
+    "exportedSymbols": {
+      "Version": [
+        314
+      ]
+    },
+    "id": 315,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 310,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".12"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 314,
+        "linearizedBaseContracts": [
+          314
+        ],
+        "name": "Version",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": true,
+            "id": 313,
+            "name": "version",
+            "nodeType": "VariableDeclaration",
+            "scope": 314,
+            "src": "52:33:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint8",
+              "typeString": "uint8"
+            },
+            "typeName": {
+              "id": 311,
+              "name": "uint8",
+              "nodeType": "ElementaryTypeName",
+              "src": "52:5:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint8",
+                "typeString": "uint8"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "31",
+              "id": 312,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "84:1:3",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1_by_1",
+                "typeString": "int_const 1"
+              },
+              "value": "1"
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 315,
+        "src": "30:59:3"
+      }
+    ],
+    "src": "0:91:3"
+  },
+  "legacyAST": {
+    "absolutePath": "/media/brvhrt/Vault/Store/New-folder/cwl/contracts/Version.sol",
+    "exportedSymbols": {
+      "Version": [
+        314
+      ]
+    },
+    "id": 315,
+    "nodeType": "SourceUnit",
+    "nodes": [
+      {
+        "id": 310,
+        "literals": [
+          "solidity",
+          "^",
+          "0.5",
+          ".12"
+        ],
+        "nodeType": "PragmaDirective",
+        "src": "0:24:3"
+      },
+      {
+        "baseContracts": [],
+        "contractDependencies": [],
+        "contractKind": "contract",
+        "documentation": null,
+        "fullyImplemented": true,
+        "id": 314,
+        "linearizedBaseContracts": [
+          314
+        ],
+        "name": "Version",
+        "nodeType": "ContractDefinition",
+        "nodes": [
+          {
+            "constant": true,
+            "id": 313,
+            "name": "version",
+            "nodeType": "VariableDeclaration",
+            "scope": 314,
+            "src": "52:33:3",
+            "stateVariable": true,
+            "storageLocation": "default",
+            "typeDescriptions": {
+              "typeIdentifier": "t_uint8",
+              "typeString": "uint8"
+            },
+            "typeName": {
+              "id": 311,
+              "name": "uint8",
+              "nodeType": "ElementaryTypeName",
+              "src": "52:5:3",
+              "typeDescriptions": {
+                "typeIdentifier": "t_uint8",
+                "typeString": "uint8"
+              }
+            },
+            "value": {
+              "argumentTypes": null,
+              "hexValue": "31",
+              "id": 312,
+              "isConstant": false,
+              "isLValue": false,
+              "isPure": true,
+              "kind": "number",
+              "lValueRequested": false,
+              "nodeType": "Literal",
+              "src": "84:1:3",
+              "subdenomination": null,
+              "typeDescriptions": {
+                "typeIdentifier": "t_rational_1_by_1",
+                "typeString": "int_const 1"
+              },
+              "value": "1"
+            },
+            "visibility": "public"
+          }
+        ],
+        "scope": 315,
+        "src": "30:59:3"
+      }
+    ],
+    "src": "0:91:3"
+  },
+  "compiler": {
+    "name": "solc",
+    "version": "0.5.12+commit.7709ece9.Emscripten.clang"
+  },
+  "networks": {},
+  "schemaVersion": "3.0.19",
+  "updatedAt": "2019-12-19T23:50:35.620Z",
+  "devdoc": {
+    "methods": {}
+  },
+  "userdoc": {
+    "methods": {}
+  }
+}
