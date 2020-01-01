@@ -1,7 +1,7 @@
 const ContractEvents = {
-    Will: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
-    Wallet: ['OwnershipRenounced', 'OwnershipTransferred'],
-    WillWallet: ['BeneficiaryUpdated', 'BeneficiarySettled', 'OwnershipRenounced', 'OwnershipTransferred'],
+  Will: ["BeneficiaryUpdated", "BeneficiarySettled"],
+  Wallet: [],
+  WillWallet: ["BeneficiaryUpdated", "BeneficiarySettled"]
 };
 
 export { ContractEvents };
