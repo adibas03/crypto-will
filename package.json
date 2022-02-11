@@ -24,7 +24,7 @@
     "@drizzle/react-components": "^1.5.1",
     "@drizzle/react-plugin": "^1.5.1",
     "@drizzle/store": "^1.5.1",
-    "@openzeppelin/contracts": "2.4.0",
+    "@openzeppelin/contracts": "4.4.2",
     "antd": "^3.25.3",
     "eth-gas-reporter": "^0.2.14",
     "prop-types": "^15.7.2",
