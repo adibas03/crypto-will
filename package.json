@@ -45,7 +45,7 @@
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "bignumber.js": "^9.0.0",
     "css-loader": "^3.2.0",
-    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-plugin": "^5.5.0",
     "less": "^3.10.3",
     "less-loader": "^5.0.0",
     "react-hot-loader": "^4.12.18",
@@ -53,7 +53,7 @@
     "style-loader": "^1.0.0",
     "truffle": "^5.1.1",
     "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.10",
+    "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.9.0",
     "webpack-merge": "^4.2.2"
   }
